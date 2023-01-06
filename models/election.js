@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
         presentStatus: "Added"
       });
     }
+
+    static getElection(id){
+      return this.findByPk(id);
+    }
   }
   Election.init(
     {
