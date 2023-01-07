@@ -12,6 +12,12 @@ module.exports = (sequelize, DataTypes) => {
     // eslint-disable-next-line no-unused-vars
     static associate(models) {
       // define association here
+      Questions.belongsTo(models.Election, {
+        foreignKey: 'electionId'
+      });
+      Questions.hasMany(models.Answers, {
+        foreignKey: 'questionId'
+      });
     }
 
     static addQuestion(question, description){

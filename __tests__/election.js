@@ -26,7 +26,7 @@ describe("Todo Application", function () {
     const response = await agent.post("/createElections").send({
       title: "Select new Class Representative",
     });
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(302);
   });
 
   test("Creates a question and responds with json at /createQuestions POST endpoint", async () => {
@@ -35,7 +35,7 @@ describe("Todo Application", function () {
       description:
         "There are three candidates. They are rabi, pushpa, khadga",
     });
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(302);
   });
   test("Creates a answer and responds with json at /createOptions POST endpoint", async () => {
     const response = await agent.post("/createOptions").send({

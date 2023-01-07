@@ -2,20 +2,17 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Elections', {
+    await queryInterface.createTable('Voters', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      title: {
+      votersId: {
         type: Sequelize.STRING
       },
-      presentStatus: {
-        type: Sequelize.STRING
-      },
-      url: {
+      votersPassword: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -28,8 +25,7 @@ module.exports = {
       }
     });
   },
-  // eslint-disable-next-line no-unused-vars
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Elections');
+    await queryInterface.dropTable('Voters');
   }
 };

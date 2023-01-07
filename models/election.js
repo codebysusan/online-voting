@@ -10,10 +10,16 @@ module.exports = (sequelize, DataTypes) => {
     // eslint-disable-next-line no-unused-vars
     static associate(models) {
       // define association here
+      Election.belongsTo(models.Admin, {
+        foreignKey: 'adminId'
+      });
+      Election.hasMany(models.Questions, {
+        foreignKey: 'electionId'
+      });
     }
     static addElection(title){
       return this.create({
-        title:title,
+        title,
         presentStatus: "Added"
       });
     }

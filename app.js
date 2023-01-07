@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const express = require("express");
 const app = express();
-const { Election, Questions, Answers } = require("./models");
+const { Election, Questions, Answers, Admin } = require("./models");
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
@@ -43,10 +43,7 @@ app.get("/elections/new", (request, response) => {
 app.post("/createElections", async (request, response) => {
   console.log("Create a election", request.body);
   try {
-    const election = await Election.create({
-        title:request.body.title,
-        presentStatus: "Added"
-      });
+    const election = await Election.addElection(request.body.title);
     const id = election.id;
     response.redirect(`/elections/${id}`);
   } catch (error) {
@@ -119,10 +116,13 @@ app.get("/questions/:id", async (request, response) => {
   const questionId = request.params.id;
   const question = await Questions.getQuestion(questionId);
   const questionTitle = question.question;
+  const getOptions = await Answers.findAll();
+  console.log(getOptions[1].options);
 
   return response.render("createOptions", {
     title: "Add Options | Online Voting Platform",
-    question: questionTitle
+    question: questionTitle,
+    getOptions
   });
 });
 
@@ -131,7 +131,8 @@ app.post("/createOptions", async (request, response) => {
   console.log("Create options");
   const options = request.body.options;
   const answer = await Answers.addOptions(options);
-  return response.json(answer);
+  // res.redirect('back');
+  return response.redirect('back');
 });
 
 // Display add voters page
