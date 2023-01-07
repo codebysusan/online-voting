@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script class="" src="https://cdn.tailwindcss.com"></script>
+    <title><%= title %></title>
+  </head>
+  <body>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <h1 class="text-4xl mt-6 font-bold"><%= electionTitle %></h1>
+        <p class="py-4">You have 0 questions in the ballot.</p>
+        <p class="underline">
+          <a class="text-blue-600" href="/elections/<%= id %>/questions"
+            >Manage Questions</a
+          >
+        </p>
+        <p class="py-4">Your election has 0 registered voters.</p>
+        <p class="pb-4 underline">
+            <a class="text-blue-600" href=""
+              >Manage Voters</a
+            >
+          </p>
+          <p class="underline">
+            <a class="text-blue-600" href=""
+              >Launch election</a
+            >
+          </p>
+      </div>
+    </div>
+  </body>
+</html>

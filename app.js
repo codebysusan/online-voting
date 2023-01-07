@@ -4,34 +4,51 @@ const app = express();
 const { Election, Questions, Answers } = require("./models");
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: false }));
 
-// Display base page
+const path = require("path");
+// View engine
+app.set("view engine", "ejs");
+
+// eslint-disable-next-line no-undef
+app.use(express.static(path.join(__dirname, "public")));
+
+
+// Display landing page
 app.get("/", (request, response) => {
-  console.log("Display base page");
-  response.send("Hello World");
+  console.log("Display landing page");
+  response.render("index", {
+    title: "Online Voting Platform"
+  });
 });
 
 // Display elections
 app.get("/elections", (request, response) => {
   console.log("Display elections");
-  response.render("");
+  response.render("election",
+  {
+    title: "Home | Online Voting Platform"
+  });
 });
 
 // Display create election page
 app.get("/elections/new", (request, response) => {
   console.log("Display create election page");
-  response.render("", {
-    title: "Create New Election",
+  response.render("createElection", {
+    title: "Create New Election | Online Voting Platform"
   });
 });
 
 // Create a election
 app.post("/createElections", async (request, response) => {
-  console.log("Create a election");
-  const title = request.body.title;
+  console.log("Create a election", request.body);
   try {
-    const election = await Election.addElection(title);
-    return response.json(election);
+    const election = await Election.create({
+        title:request.body.title,
+        presentStatus: "Added"
+      });
+    const id = election.id;
+    response.redirect(`/elections/${id}`);
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
@@ -41,74 +58,80 @@ app.post("/createElections", async (request, response) => {
 // Display election single page with details
 app.get("/elections/:id", async (request, response) => {
   console.log("Display election single page with details");
-  const election = await Election.getElection(request.params.id);
-  const { title } = election;
-  response.render("", {
-    title: title,
+  const id = request.params.id;
+  const election = await Election.getElection(id);
+  const electionTitle = election.title;
+  response.render("manageElection", {
+    title: "Manage Election | Online Voting Platform",
+    electionTitle,
+    id
   });
 });
 
 // Display add question page
 app.get("/elections/:id/questions", async (request, response) => {
   console.log("Display add question page ");
-  const election = await Election.getElection(request.params.id);
-  const { title } = election;
-  response.render("", {
-    title: title,
+  const id = request.params.id;
+  const election = await Election.getElection(id);
+  const electionTitle = election.title;
+  response.render("question", {
+    title: "Create Questions | Online Voting Platform",
+    electionTitle,
+    id
   });
 });
 
 // Display add question form page
 app.get("/elections/:id/questions/new", async (request, response) => {
   console.log("Display add question form page");
-  const election = await Election.findByPk(request.params.id);
-  const { title } = election;
-  response.render("", {
-    title: title,
+  const id = request.params.id;
+  const election = await Election.getElection(id);
+  response.render("createQuestion", {
+    title: "New Question | Online Voting Platform",
   });
+  // response.send("Hello");
 });
 
 // Create Question
-app.post(
-  "/createQuestions",
-  async (request, response) => {
-    console.log("Create question");
+app.post("/createQuestions", async (request, response) => {
+  console.log("Create question");
 
-    try {
-      const questionTitle = request.body.question;
-      const questionDescription = request.body.description;
-      const question = await Questions.create({
-        question: questionTitle,
-        description: questionDescription,
-      });
-      return response.json(question);
-    } catch (error) {
-      console.log(error);
-      return response.status(422).json(error);
-    }
+  try {
+    const questionTitle = request.body.question;
+    const questionDescription = request.body.description;
+    const question = await Questions.addQuestion(
+      questionTitle,
+      questionDescription
+    );
+    const questionId = question.id;
+    response.redirect(`/questions/${questionId}`);
+  } catch (error) {
+    console.log(error);
+    return response.status(422).json(error);
   }
-);
+});
 
 // Display add options page
 app.get("/questions/:id", async (request, response) => {
   console.log(
     "Add option for particular question must have minimum 2 options."
   );
+  const questionId = request.params.id;
+  const question = await Questions.getQuestion(questionId);
+  const questionTitle = question.question;
 
-  const question = await Questions.findByPk(request.params.id);
-  return response.json(question);
+  return response.render("createOptions", {
+    title: "Add Options | Online Voting Platform",
+    question: questionTitle
+  });
 });
 
 // Create options
 app.post("/createOptions", async (request, response) => {
-  console.log(
-    "Create options"
-  );
+  console.log("Create options");
   const options = request.body.options;
-  const answer = await Answers.create({
-    options,
-  });
-  return response.json(options);
+  const answer = await Answers.addOptions(options);
+  return response.json(answer);
 });
 
 // Display add voters page
@@ -124,7 +147,7 @@ app.put("/elections/:id/launch", async (request, response) => {
 
   try {
     const launch = await election.update({
-      status: "Launch",
+        presentStatus: "Launch",
     });
     return response.json(launch);
   } catch (error) {

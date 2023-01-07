@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     }
     static addElection(title){
       return this.create({
-        title,
+        title:title,
         presentStatus: "Added"
       });
     }

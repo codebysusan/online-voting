@@ -33,7 +33,7 @@ describe("Todo Application", function () {
     const response = await agent.post("/createQuestions").send({
       question: "New Prime Minister of Nepal",
       description:
-        "There are three candidates. They are rabi, pushpa, khagendra",
+        "There are three candidates. They are rabi, pushpa, khadga",
     });
     expect(response.statusCode).toBe(200);
   });

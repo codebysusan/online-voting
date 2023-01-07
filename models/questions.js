@@ -13,6 +13,17 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
+
+    static addQuestion(question, description){
+      return this.create({
+        question,
+        description,
+      });
+    }
+
+    static getQuestion(id){
+      return this.findByPk(id);
+    }
   }
   Questions.init({
     question: {

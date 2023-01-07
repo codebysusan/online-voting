@@ -13,6 +13,12 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
+
+    static addOptions(options){
+      return this.create({
+        options,
+      });
+    }
   }
   Answers.init({
     options: DataTypes.STRING
