@@ -41,6 +41,6 @@ describe("Todo Application", function () {
     const response = await agent.post("/createOptions").send({
       options: "Person A",
     });
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(302);
   });
 });
