@@ -37,36 +37,37 @@ app.get("/signup", (request, response) => {
 });
 
 // Display elections
-app.get("/elections", (request, response) => {
-  console.log("Display elections");
-  response.render("election", {
-    title: "Home | Online Voting Platform",
-    csrfToken: request.csrfToken(),
-  });
+app.get("/elections", async (request, response) => {
+  const elections = await Election.findAll();
+  if (request.accepts("html")) {
+    response.render("election", {
+      title: "Home | Online Voting Platform",
+      csrfToken: request.csrfToken(),
+      elections,
+    });
+  } else {
+    return response.json(elections);
+  }
 });
 
 app.post("/admins", async (request, response) => {
-
   // Hashed Password using bcrypt
-  const hashPassword  = await bcrypt.hash(request.body.password, saltRounds);
+  const hashPassword = await bcrypt.hash(request.body.password, saltRounds);
 
-  // Create admin 
+  // Create admin
   try {
-    const { firstName, lastName, email, password } = request.body;
+    const { firstName, lastName, email } = request.body;
     const admin = await Admin.create({
       firstName,
       lastName,
       email,
       password: hashPassword,
     });
-    return response.json(admin);
+    return response.redirect("/elections");
   } catch (error) {
     console.log(error);
     return response.json(error);
   }
-
-  
-  // return response.redirect("/elections");
 });
 
 // Display create election page
@@ -74,16 +75,16 @@ app.get("/elections/new", (request, response) => {
   console.log("Display create election page");
   response.render("createElection", {
     title: "Create New Election | Online Voting Platform",
+    csrfToken: request.csrfToken(),
   });
 });
 
 // Create a election
 app.post("/createElections", async (request, response) => {
-  console.log("Create a election", request.body);
   try {
     const election = await Election.addElection(request.body.title);
     const id = election.id;
-    response.redirect(`/elections/${id}`, {});
+    return response.redirect(`/elections/${id}`);
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
@@ -98,6 +99,7 @@ app.get("/elections/:id", async (request, response) => {
   const electionTitle = election.title;
   response.render("manageElection", {
     title: "Manage Election | Online Voting Platform",
+    csrfToken: request.csrfToken(),
     electionTitle,
     id,
   });
@@ -109,11 +111,18 @@ app.get("/elections/:id/questions", async (request, response) => {
   const id = request.params.id;
   const election = await Election.getElection(id);
   const electionTitle = election.title;
-  response.render("question", {
-    title: "Create Questions | Online Voting Platform",
-    electionTitle,
-    id,
-  });
+  const question = await Questions.findAll();
+  if (request.accepts("html")) {
+    return response.render("question", {
+      title: "Create Questions | Online Voting Platform",
+      csrfToken: request.csrfToken(),
+      electionTitle,
+      id,
+      question,
+    });
+  } else {
+    return response.json(question);
+  }
 });
 
 // Display add question form page
@@ -121,16 +130,16 @@ app.get("/elections/:id/questions/new", async (request, response) => {
   console.log("Display add question form page");
   const id = request.params.id;
   const election = await Election.getElection(id);
+
   response.render("createQuestion", {
     title: "New Question | Online Voting Platform",
+    csrfToken: request.csrfToken(),
   });
-  // response.send("Hello");
 });
 
 // Create Question
 app.post("/createQuestions", async (request, response) => {
   console.log("Create question");
-
   try {
     const questionTitle = request.body.question;
     const questionDescription = request.body.description;
@@ -155,22 +164,33 @@ app.get("/questions/:id", async (request, response) => {
   const question = await Questions.getQuestion(questionId);
   const questionTitle = question.question;
   const getOptions = await Answers.findAll();
-  console.log(getOptions[1].options);
-
-  return response.render("createOptions", {
-    title: "Add Options | Online Voting Platform",
-    question: questionTitle,
-    getOptions,
-  });
+  console.log(getOptions.length);
+  try {
+    return response.render("createOptions", {
+      title: "Add Options | Online Voting Platform",
+      csrfToken: request.csrfToken(),
+      question: questionTitle,
+      getOptions,
+      questionId,
+    });
+  } catch (error) {
+    console.log("Error message: ", error);
+    return response.json(error);
+  }
 });
+
 
 // Create options
 app.post("/createOptions", async (request, response) => {
   console.log("Create options");
-  const options = request.body.options;
-  const answer = await Answers.addOptions(options);
-  // res.redirect('back');
-  return response.redirect("back");
+  const {options, questionId} = request.body;
+  try {
+    const answer = await Answers.addOptions(options, questionId);
+    return response.redirect("back");
+  } catch (error) {
+    console.log("Error received : ", error);
+    return response.json(error);
+  }
 });
 
 // Display add voters page

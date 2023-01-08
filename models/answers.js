@@ -16,9 +16,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'questionId'
       })
     }
-    static addOptions(options){
+    static addOptions(options, questionId){
       return this.create({
         options,
+        questionId
       });
     }
   }

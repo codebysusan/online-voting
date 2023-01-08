@@ -20,10 +20,11 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
-    static addQuestion(question, description){
+    static addQuestion(question, description, electionId){
       return this.create({
         question,
         description,
+        electionId
       });
     }
 
