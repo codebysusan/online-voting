@@ -11,20 +11,29 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Election.belongsTo(models.Admin, {
-        foreignKey: 'adminId'
+        foreignKey: "adminId",
       });
       Election.hasMany(models.Questions, {
-        foreignKey: 'electionId'
+        foreignKey: "electionId",
       });
     }
-    static addElection(title){
+    static addElection(title, adminId) {
       return this.create({
         title,
-        presentStatus: "Added"
+        presentStatus: "Added",
+        adminId,
       });
     }
 
-    static getElection(id){
+    static getAllElections(adminId) {
+      return this.findAll({
+        where: {
+          adminId,
+        },
+      });
+    }
+
+    static getElection(id) {
       return this.findByPk(id);
     }
   }

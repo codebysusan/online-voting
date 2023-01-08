@@ -16,6 +16,7 @@
         <h1 class="text-4xl mt-6 font-bold">New Question</h1>
         <form action="/createQuestions" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <input type="hidden" name="electionId" value="<%= electionId %>" />
           <div class="pt-8">
             <div>
               <label for="question" class="text-xl">Enter your question:</label>

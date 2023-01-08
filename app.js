@@ -90,7 +90,7 @@ app.get("/", (request, response) => {
   response.render("index", {
     title: "Online Voting Platform",
     csrfToken: request.csrfToken(),
-    isSignedIn: false
+    isSignedIn: false,
   });
 });
 
@@ -98,6 +98,7 @@ app.get("/signup", (request, response) => {
   response.render("signup", {
     title: "Sign up | Online Voting Platform",
     csrfToken: request.csrfToken(),
+    isSignedIn: false,
   });
 });
 
@@ -105,7 +106,7 @@ app.get("/login", (request, response) => {
   response.render("login", {
     title: "Login | Online Voting Platform",
     csrfToken: request.csrfToken(),
-    isSignedIn: false
+    isSignedIn: false,
   });
 });
 
@@ -126,28 +127,6 @@ app.post(
   }),
   (request, response) => {
     response.redirect("/elections");
-  }
-);
-
-// Display elections
-app.get(
-  "/elections",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    const elections = await Election.findAll();
-    const admin = request.admin;
-    // Remember to refactor test case white creating elections
-    if (request.accepts("html")) {
-      response.render("election", {
-        title: "Home | Online Voting Platform",
-        csrfToken: request.csrfToken(),
-        isSignedIn: true,
-        elections,
-        admin,
-      });
-    } else {
-      return response.json(elections);
-    }
   }
 );
 
@@ -176,6 +155,34 @@ app.post("/admins", async (request, response) => {
   }
 });
 
+// Display elections
+app.get(
+  "/elections",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    const admin = request.user;
+    const adminId = admin.id;
+    const elections = await Election.findAll({
+      where: {
+        adminId,
+      },
+    });
+    // Remember to refactor test case white creating elections
+
+    if (request.accepts("html")) {
+      response.render("election", {
+        title: "Home | Online Voting Platform",
+        csrfToken: request.csrfToken(),
+        isSignedIn: true,
+        elections,
+        admin,
+      });
+    } else {
+      return response.json(elections);
+    }
+  }
+);
+
 // Display create election page
 app.get(
   "/elections/new",
@@ -185,7 +192,7 @@ app.get(
     response.render("createElection", {
       title: "Create New Election | Online Voting Platform",
       csrfToken: request.csrfToken(),
-      isSignedIn: true
+      isSignedIn: true,
     });
   }
 );
@@ -195,8 +202,10 @@ app.post(
   "/createElections",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
+    const admin = request.user;
+    const adminId = admin.id;
     try {
-      const election = await Election.addElection(request.body.title);
+      const election = await Election.addElection(request.body.title, adminId);
       const id = election.id;
       return response.redirect(`/elections/${id}`);
     } catch (error) {
@@ -212,15 +221,20 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     console.log("Display election single page with details");
-    const id = request.params.id;
-    const election = await Election.getElection(id);
-    const electionTitle = election.title;
+
+    const electionId = request.params.id;
+    const election = await Election.getElection(electionId);
+    const questions = await Questions.findAll({
+      where: {
+        electionId,
+      },
+    });
     response.render("manageElection", {
       title: "Manage Election | Online Voting Platform",
       csrfToken: request.csrfToken(),
       isSignedIn: true,
-      electionTitle,
-      id,
+      election,
+      questions,
     });
   }
 );
@@ -231,21 +245,24 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     console.log("Display add question page ");
-    const id = request.params.id;
-    const election = await Election.getElection(id);
-    const electionTitle = election.title;
-    const question = await Questions.findAll();
+
+    const electionId = request.params.id;
+    const election = await Election.getElection(electionId);
+    const questions = await Questions.findAll({
+      where: {
+        electionId,
+      },
+    });
     if (request.accepts("html")) {
       return response.render("question", {
         title: "Create Questions | Online Voting Platform",
         csrfToken: request.csrfToken(),
         isSignedIn: true,
-        electionTitle,
-        id,
-        question,
+        election,
+        questions,
       });
     } else {
-      return response.json(question);
+      return response.json(questions);
     }
   }
 );
@@ -256,13 +273,15 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     console.log("Display add question form page");
-    const id = request.params.id;
-    const election = await Election.getElection(id);
+
+    const electionId = request.params.id;
+    const election = await Election.getElection(electionId);
 
     response.render("createQuestion", {
       title: "New Question | Online Voting Platform",
       csrfToken: request.csrfToken(),
-      isSignedIn: true
+      isSignedIn: true,
+      electionId,
     });
   }
 );
@@ -273,12 +292,13 @@ app.post("/createQuestions", async (request, response) => {
   try {
     const questionTitle = request.body.question;
     const questionDescription = request.body.description;
+    const electionId = request.body.electionId;
     const question = await Questions.addQuestion(
       questionTitle,
-      questionDescription
+      questionDescription,
+      electionId
     );
-    const questionId = question.id;
-    response.redirect(`/questions/${questionId}`);
+    response.redirect(`/questions/${question.id}`);
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
@@ -295,17 +315,20 @@ app.get(
     );
     const questionId = request.params.id;
     const question = await Questions.getQuestion(questionId);
-    const questionTitle = question.question;
-    const getOptions = await Answers.findAll();
+
+    const getOptions = await Answers.findAll({
+      where: {
+        questionId,
+      },
+    });
     console.log(getOptions.length);
     try {
       return response.render("createOptions", {
         title: "Add Options | Online Voting Platform",
         csrfToken: request.csrfToken(),
         isSignedIn: true,
-        question: questionTitle,
+        question,
         getOptions,
-        questionId,
       });
     } catch (error) {
       console.log("Error message: ", error);
@@ -320,7 +343,7 @@ app.post("/createOptions", async (request, response) => {
   const { options, questionId } = request.body;
   try {
     const answer = await Answers.addOptions(options, questionId);
-    return response.redirect("back");
+    return response.redirect(`/questions/${questionId}`);
   } catch (error) {
     console.log("Error received : ", error);
     return response.json(error);

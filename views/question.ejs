@@ -13,13 +13,32 @@
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
         <%- include('header.ejs') %>
-        <h1 class="text-4xl mt-6 font-bold"><%= electionTitle %> - Questions</h1>
-        <p class="py-4 text-lg">You have 0 questions in the ballot.</p>
+        <h1 class="text-4xl mt-6 font-bold">
+          <%= election.title %> - Question
+        </h1>
+        <p class="py-4 text-lg">
+          You have <%= questions.length %> questions in the ballot.
+        </p>
         <p class="underline">
-            <a class="text-blue-600 text-lg" href="/elections/<%= id %>/questions/new"
-              >Create a questions</a
-            >
-          </p>
+          <a
+            class="text-blue-600 text-lg"
+            href="/elections/<%= election.id %>/questions/new"
+            >Create a questions</a
+          >
+        </p>
+        <div class="py-6">
+          <% if(questions.length > 0){%> 
+            <% for(let i = 0; i < questions.length; i++){ %>
+              <p class="mb-4">
+                <%= i+1%>.
+                <a href="/questions/ <%= questions[i].id%>">
+                  <%= questions[i].question %>
+                </a>
+              </p>
+            <% }%> 
+          <% }%>
+        </div>
+                    
       </div>
     </div>
   </body>

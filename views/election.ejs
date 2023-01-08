@@ -10,13 +10,37 @@
     <title><%= title %></title>
   </head>
   <body>
-    <div class="p-4">
-      <%- include('header.ejs')%>
-      <h1 class="text-4xl mt-6 font-bold">Welcome</h1>
-      <p class="py-4">You haven't created any elections yet!</p>
-      <p class="underline">
-        <a class="text-blue-600" href="/elections/new">Create a new election</a>
-      </p>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <%- include('header.ejs')%>
+        <h1 class="text-4xl mt-6 font-bold">
+          Welcome <%= admin.firstName %> <%= admin.lastName %>
+        </h1>
+        <% if(elections.length == 0){%>
+        <p class="py-4">You haven't created any elections yet!</p>
+        <%}else{%>
+        <p class="py-4">You have created <%= elections.length%> elections.</p>
+        <%}%>
+        <p class="underline">
+          <a class="text-blue-600" href="/elections/new"
+            >Create a new election</a
+          >
+        </p>
+        <h3 class="mt-8 mb-4 text-2xl font-bold">
+          Your Elections
+        </h3>
+        <div class="py-4">
+          <% if(elections.length > 0){%> 
+            <% for(let i = 0; i < elections.length; i++){ %>
+              <p class="mb-4"> <%= i+1%>. 
+                <a   href="/elections/<%= elections[i].id %>">
+                  <%= elections[i].title %>
+                </a>
+              </p>
+            <% }%> 
+          <% }%>
+        </div>
+      </div>
     </div>
   </body>
 </html>
