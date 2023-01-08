@@ -91,6 +91,13 @@ app.get("/signup", (request, response) => {
   });
 });
 
+app.get("/login",(request,response)=>{
+  response.render("login", {
+    title: "Login | Online Voting Platform",
+    csrfToken: request.csrfToken()
+  })
+});
+
 // Display elections
 app.get(
   "/elections",
