@@ -44,11 +44,20 @@ passport.use(
       Admin.findOne({
         where: {
           email: username,
-          password: password,
         },
       })
-        .then((admin) => {
-          return done(null, admin);
+        .then(async (admin) => {
+          if (!admin) {
+            return done(null, false, {
+              message: "Couldn't find the user account",
+            });
+          }
+          const result = await bcrypt.compare(password, admin.password);
+          if (result) {
+            return done(null, admin);
+          } else {
+            return done("Invalid Password");
+          }
         })
         .catch((error) => {
           return error;
@@ -64,8 +73,8 @@ passport.serializeUser((admin, done) => {
 
 passport.deserializeUser((id, done) => {
   Admin.findByPk(id)
-    .then((user) => {
-      done(null, user);
+    .then((admin) => {
+      done(null, admin);
     })
     .catch((error) => {
       done(error, null);
@@ -81,6 +90,7 @@ app.get("/", (request, response) => {
   response.render("index", {
     title: "Online Voting Platform",
     csrfToken: request.csrfToken(),
+    isSignedIn: false
   });
 });
 
@@ -91,12 +101,33 @@ app.get("/signup", (request, response) => {
   });
 });
 
-app.get("/login",(request,response)=>{
+app.get("/login", (request, response) => {
   response.render("login", {
     title: "Login | Online Voting Platform",
-    csrfToken: request.csrfToken()
-  })
+    csrfToken: request.csrfToken(),
+    isSignedIn: false
+  });
 });
+
+app.get("/signout", (request, response, next) => {
+  request.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    response.redirect("/");
+  });
+});
+
+app.post(
+  "/session",
+  passport.authenticate("local", {
+    failureRedirect: "/login",
+    failureFlash: true,
+  }),
+  (request, response) => {
+    response.redirect("/elections");
+  }
+);
 
 // Display elections
 app.get(
@@ -110,6 +141,7 @@ app.get(
       response.render("election", {
         title: "Home | Online Voting Platform",
         csrfToken: request.csrfToken(),
+        isSignedIn: true,
         elections,
         admin,
       });
@@ -153,6 +185,7 @@ app.get(
     response.render("createElection", {
       title: "Create New Election | Online Voting Platform",
       csrfToken: request.csrfToken(),
+      isSignedIn: true
     });
   }
 );
@@ -185,6 +218,7 @@ app.get(
     response.render("manageElection", {
       title: "Manage Election | Online Voting Platform",
       csrfToken: request.csrfToken(),
+      isSignedIn: true,
       electionTitle,
       id,
     });
@@ -205,6 +239,7 @@ app.get(
       return response.render("question", {
         title: "Create Questions | Online Voting Platform",
         csrfToken: request.csrfToken(),
+        isSignedIn: true,
         electionTitle,
         id,
         question,
@@ -227,6 +262,7 @@ app.get(
     response.render("createQuestion", {
       title: "New Question | Online Voting Platform",
       csrfToken: request.csrfToken(),
+      isSignedIn: true
     });
   }
 );
@@ -266,6 +302,7 @@ app.get(
       return response.render("createOptions", {
         title: "Add Options | Online Voting Platform",
         csrfToken: request.csrfToken(),
+        isSignedIn: true,
         question: questionTitle,
         getOptions,
         questionId,

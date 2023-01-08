@@ -12,6 +12,7 @@
   <body>
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
+        <%- include('header.ejs') %>
         <h1 class="text-4xl mt-6 font-bold">Question - 1</h1>
         <p class="pt-4 font-medium text-xl"><%= question %></p>
         <form class="mt-4" method="post" action="/createOptions">
