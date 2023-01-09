@@ -160,7 +160,7 @@ app.post("/admins", async (request, response) => {
       return response.redirect("/signup");
     }
     if (error.errors[0].message == "Validation len on firstName failed") {
-      request.flash("alert", "Enter a valid first name.");
+      request.flash("alert", "First name is required.");
       return response.redirect("/signup");
     }
 
@@ -298,10 +298,10 @@ app.get(
 // Create Question
 app.post("/createQuestions", async (request, response) => {
   console.log("Create question");
+  const electionId = request.body.electionId;
   try {
     const questionTitle = request.body.question;
     const questionDescription = request.body.description;
-    const electionId = request.body.electionId;
     const question = await Questions.addQuestion(
       questionTitle,
       questionDescription,
@@ -310,6 +310,14 @@ app.post("/createQuestions", async (request, response) => {
     response.redirect(`/questions/${question.id}`);
   } catch (error) {
     console.log(error);
+    if (error.errors[0].message == "Validation len on question failed") {
+      request.flash("alert", "Please enter question");
+      return response.redirect(`/elections/${electionId}/questions/new`);
+    }
+    if (error.errors[0].message == "Validation len on description failed") {
+      request.flash("alert", "Please enter description");
+      return response.redirect(`/elections/${electionId}/questions/new`);
+    }
     return response.status(422).json(error);
   }
 });
