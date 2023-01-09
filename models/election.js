@@ -41,6 +41,11 @@ module.exports = (sequelize, DataTypes) => {
     {
       title: {
         type: DataTypes.STRING,
+        allowNull: false,
+        validate:{
+          notNull: true,
+          len: 1
+        }
       },
       presentStatus: {
         type: DataTypes.STRING,

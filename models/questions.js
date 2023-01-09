@@ -26,6 +26,14 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
+    static getAllQuestions(electionId){
+      return this.findAll({
+        where: {
+          electionId,
+        },
+      });
+    }
+
     static getQuestion(id) {
       return this.findByPk(id);
     }

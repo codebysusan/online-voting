@@ -53,14 +53,14 @@ passport.use(
         .then(async (admin) => {
           if (!admin) {
             return done(null, false, {
-              message: "Couldn't find the user account",
+              message: "Invalid Credentials",
             });
           }
           const result = await bcrypt.compare(password, admin.password);
           if (result) {
             return done(null, admin);
           } else {
-            return done(null, false, {message: "Invalid Password"});
+            return done(null, false, {message: "Invalid Credentials"});
           }
         })
         .catch((error) => {
@@ -95,7 +95,7 @@ const saltRounds = 10;
 
 // Display landing page
 app.get("/", (request, response) => {
-  console.log("Display landing page");
+  // console.log("Display landing page");
   response.render("index", {
     title: "Online Voting Platform",
     csrfToken: request.csrfToken(),
@@ -146,12 +146,7 @@ app.post("/admins", async (request, response) => {
   // Create admin
   try {
     const { firstName, lastName, email } = request.body;
-    const admin = await Admin.create({
-      firstName,
-      lastName,
-      email,
-      password: hashPassword,
-    });
+    const admin = await Admin.createAdmin(firstName, lastName, email, hashPassword);
     request.logIn(admin, (err) => {
       if (err) {
         console.log(err);
@@ -184,13 +179,9 @@ app.get(
   async (request, response) => {
     const admin = request.user;
     const adminId = admin.id;
-    const elections = await Election.findAll({
-      where: {
-        adminId,
-      },
-    });
-    // Remember to refactor test case white creating elections
+    const elections = await Election.getAllElections(adminId);
 
+    // Remember to refactor test case white creating elections
     if (request.accepts("html")) {
       response.render("election", {
         title: "Home | Online Voting Platform",
@@ -232,6 +223,10 @@ app.post(
       return response.redirect(`/elections/${id}`);
     } catch (error) {
       console.log(error);
+      if (error.errors[0].message == "Validation len on title failed") {
+        request.flash("alert", "Please enter a title");
+        return response.redirect("elections/new");
+      }
       return response.status(422).json(error);
     }
   }
@@ -246,11 +241,7 @@ app.get(
 
     const electionId = request.params.id;
     const election = await Election.getElection(electionId);
-    const questions = await Questions.findAll({
-      where: {
-        electionId,
-      },
-    });
+    const questions = await Questions.getAllQuestions(electionId);
     response.render("manageElection", {
       title: "Manage Election | Online Voting Platform",
       csrfToken: request.csrfToken(),
@@ -270,11 +261,7 @@ app.get(
 
     const electionId = request.params.id;
     const election = await Election.getElection(electionId);
-    const questions = await Questions.findAll({
-      where: {
-        electionId,
-      },
-    });
+    const questions = await Questions.getAllQuestions(electionId);
     if (request.accepts("html")) {
       return response.render("question", {
         title: "Create Questions | Online Voting Platform",
@@ -294,7 +281,7 @@ app.get(
   "/elections/:id/questions/new",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
-    console.log("Display add question form page");
+    // console.log("Display add question form page");
 
     const electionId = request.params.id;
     const election = await Election.getElection(electionId);
@@ -338,11 +325,7 @@ app.get(
     const questionId = request.params.id;
     const question = await Questions.getQuestion(questionId);
 
-    const getOptions = await Answers.findAll({
-      where: {
-        questionId,
-      },
-    });
+    const getOptions = await Answers.getAllAnswers(questionId);
     console.log(getOptions.length);
     try {
       return response.render("createOptions", {
@@ -384,7 +367,7 @@ app.get(
 //
 app.put("/elections/:id/launch", async (request, response) => {
   console.log("Launch specific election.");
-  const election = await Election.findByPk(request.params.id);
+  const election = await Election.getElection(request.params.id);
   try {
     const launch = await election.update({
       presentStatus: "Launch",

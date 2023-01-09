@@ -44,7 +44,7 @@ describe("Online Voting Application", function () {
     res = await agent.post("/admins").send({
       firstName: "Test",
       lastName: "User A",
-      email: "user.a@test.com",
+      email: "susank@gmail.com",
       password: "12345678",
       _csrf: csrfToken,
     });
@@ -62,7 +62,7 @@ describe("Online Voting Application", function () {
 
   test("Creates a election and responds with json at /createElections POST endpoint", async () => {
     const agent = request.agent(server);
-    await login(agent, "user.a@test.com", "12345678");
+    await login(agent, "susank@gmail.com", "12345678");
     const res = await agent.get("/elections/new");
     const csrfToken = extractCsrfToken(res);
     // console.log("This is for csrf token",csrfToken);
@@ -76,7 +76,7 @@ describe("Online Voting Application", function () {
   test("Creates a question and responds with json at /createQuestions POST endpoint", async () => {
     // Created election first
     const agent = request.agent(server);
-    await login(agent, "user.a@test.com", "12345678");
+    await login(agent, "susank@gmail.com", "12345678");
     let res = await agent.get("/elections/new");
     let csrfToken = extractCsrfToken(res);
     const createElection = await agent.post("/createElections").send({
@@ -109,7 +109,7 @@ describe("Online Voting Application", function () {
 
   test("Creates a answer and responds with json at /createOptions POST endpoint", async () => {
     const agent = request.agent(server);
-    await login(agent, "user.a@test.com", "12345678");
+    await login(agent, "susank@gmail.com", "12345678");
     // Created election first
     let res = await agent.get("/elections/new");
     let csrfToken = extractCsrfToken(res);

@@ -20,6 +20,14 @@ module.exports = (sequelize, DataTypes) => {
         questionId,
       });
     }
+
+    static getAllAnswers(questionId){
+      return this.findAll({
+        where: {
+          questionId,
+        },
+      });
+    }
   }
   Answers.init(
     {
