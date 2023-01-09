@@ -60,7 +60,7 @@ passport.use(
           if (result) {
             return done(null, admin);
           } else {
-            return done("Invalid Password");
+            return done(null, false, {message: "Invalid Password"});
           }
         })
         .catch((error) => {
@@ -69,6 +69,11 @@ passport.use(
     }
   )
 );
+
+app.use(function(request, response, next) {
+  response.locals.messages = request.flash();
+  next();
+});
 
 passport.serializeUser((admin, done) => {
   console.log("Serializing user in session", admin.id);
@@ -147,7 +152,7 @@ app.post("/admins", async (request, response) => {
       email,
       password: hashPassword,
     });
-    request.login(admin, (err) => {
+    request.logIn(admin, (err) => {
       if (err) {
         console.log(err);
       }
@@ -155,6 +160,19 @@ app.post("/admins", async (request, response) => {
     });
   } catch (error) {
     console.log(error);
+    if (error.name == "SequelizeUniqueConstraintError") {
+      request.flash("alert", "Email already in use.");
+      return response.redirect("/signup");
+    }
+    if (error.errors[0].message == "Validation len on firstName failed") {
+      request.flash("alert", "Enter a valid first name.");
+      return response.redirect("/signup");
+    }
+
+    if (error.errors[0].message == "Validation isEmail on email failed") {
+      request.flash("alert", "Enter a valid email.");
+      return response.redirect("/signup");
+    }
     return response.json(error);
   }
 });

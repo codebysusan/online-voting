@@ -16,10 +16,36 @@ module.exports = (sequelize, DataTypes) => {
   }
   Admin.init(
     {
-      firstName: DataTypes.STRING,
-      lastName: DataTypes.STRING,
-      email: DataTypes.STRING,
-      password: DataTypes.STRING,
+      firstName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate:{
+          notNull: true,
+          len:{
+            min: 1
+          }
+        }
+      },
+      lastName:  {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      email:  {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate:{
+          notNull: true,
+          isEmail: true,
+        }
+      },
+      password:  {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate:{
+          notNull: true
+        }
+      },
     },
     {
       sequelize,
