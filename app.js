@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 const express = require("express");
 const app = express();
@@ -10,6 +11,7 @@ const connectEnsureLogin = require("connect-ensure-login");
 const session = require("express-session");
 const LocalStrategy = require("passport-local");
 const bcrypt = require("bcrypt");
+const flash = require("connect-flash");
 app.use(bodyParser.json());
 
 // View engine
@@ -21,6 +23,8 @@ app.use(cookieParser());
 app.use(csrf({ cookie: true }));
 // eslint-disable-next-line no-undef
 app.use(express.static(path.join(__dirname, "public")));
+app.set("views", path.join(__dirname, "views"));
+app.use(flash());
 
 app.use(
   session({
