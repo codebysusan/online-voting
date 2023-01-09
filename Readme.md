@@ -1,0 +1,3 @@
+# Online Voting Application
+
+This is an online voting application which is built using Node.js, which allows election officer/administrators to create an account. It allows election administrator to create an election with multiple number of questions and manage them and each questions have different options. The voters are users who will vote the elections which are launched by administrator if they are among the eligible voters list.
