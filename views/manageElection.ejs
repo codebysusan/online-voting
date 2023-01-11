@@ -13,6 +13,19 @@
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
         <%- include('header.ejs') %>
+        <nav>
+          <ul class="flex">
+            <li class="flex-start">
+              <a href="/elections">Home</a>
+            </li>
+            <span class="mx-3">
+              >>
+            </span>
+            <li class="flex-start">
+              <a href="/elections/<%=election.id%>"><%= election.title %></a>
+            </li>
+          </ul>
+        </nav>
         <h1 class="text-4xl mt-6 font-bold"><%= election.title %></h1>
         <p class="underline mt-4">
           <a class="text-blue-600" href="/elections/<%= election.id %>/questions"
@@ -22,7 +35,7 @@
         <% if(questions.length == 0){%>
           <p class="py-4">You haven't created any elections yet!</p>
           <%}else{%>
-          <p class="py-4">You have created <%= questions.length%> elections.</p>
+          <p class="py-4">You have created <%= questions.length%> questions in the ballot.</p>
           <%}%>
         <p class="pb-4 underline">
             <a class="text-blue-600" href=""

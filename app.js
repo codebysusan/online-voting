@@ -291,6 +291,7 @@ app.get(
       csrfToken: request.csrfToken(),
       isSignedIn: true,
       electionId,
+      election
     });
   }
 );

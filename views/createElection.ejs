@@ -13,6 +13,19 @@
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
         <%- include('header.ejs') %>
+        <nav>
+          <ul class="flex">
+            <li class="flex-start">
+              <a href="/elections">Home</a>
+            </li>
+            <span class="mx-3">
+              >>
+            </span>
+            <li class="flex-start">
+              <a href="/elections/new">Create New Election</a>
+            </li>
+          </ul>
+        </nav>
         <h1 class="text-4xl mt-6 font-bold">Create New Election</h1>
         <form action="/createElections" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
