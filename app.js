@@ -333,8 +333,11 @@ app.get(
     );
     const questionId = request.params.id;
     const question = await Questions.getQuestion(questionId);
-
+    const electionId = question.electionId;
+    console.log(electionId);
+    const election = await Election.getElection(electionId);
     const getOptions = await Answers.getAllAnswers(questionId);
+
     console.log(getOptions.length);
     try {
       return response.render("createOptions", {
@@ -343,6 +346,7 @@ app.get(
         isSignedIn: true,
         question,
         getOptions,
+        election
       });
     } catch (error) {
       console.log("Error message: ", error);

@@ -13,6 +13,31 @@
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
         <%- include('header.ejs') %>
+        <nav>
+          <ul class="flex">
+            <li class="flex-start">
+              <a href="/elections">Home</a>
+            </li>
+            <span class="mx-3">
+              >>
+            </span>
+            <li class="flex-start">
+              <a href="/elections/<%=election.id%>"><%= election.title %></a>
+            </li>
+            <span class="mx-3">
+              >>
+            </span>
+            <li class="flex-start">
+              <a href="/elections/<%=election.id%>/questions">Questions</a>
+            </li>
+            <span class="mx-3">
+              >>
+            </span>
+            <li class="flex-start">
+              <a href="/questions/<%=question.id%>">This is a question.</a>
+            </li>
+          </ul>
+        </nav>
         <h1 class="text-4xl mt-6 font-bold">Question </h1>
         <p class="pt-4 font-medium text-xl"><%= question.question %></p>
         <form class="mt-4" method="post" action="/createOptions">
