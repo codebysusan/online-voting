@@ -8,9 +8,6 @@
     <link rel="stylesheet" href="/css/style.css" />
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
-    <script>
-
-    </script>
   </head>
   <body>
     <div class="grid grid-cols-6">
@@ -46,10 +43,8 @@
             >
           </p>
           <p class="underline">
-            <a class="text-blue-600" onclick="launchElection">
-            <!-- href="/elections/<%= election.id %>/launch" -->
-
-              Launch election</a
+            <a class="text-blue-600" href="/elections/<%= election.id %>"
+              >Launch election</a
             >
           </p>
       </div>

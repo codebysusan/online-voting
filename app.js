@@ -60,7 +60,7 @@ passport.use(
           if (result) {
             return done(null, admin);
           } else {
-            return done(null, false, {message: "Invalid Credentials"});
+            return done(null, false, { message: "Invalid Credentials" });
           }
         })
         .catch((error) => {
@@ -70,7 +70,7 @@ passport.use(
   )
 );
 
-app.use(function(request, response, next) {
+app.use(function (request, response, next) {
   response.locals.messages = request.flash();
   next();
 });
@@ -90,7 +90,7 @@ passport.deserializeUser((id, done) => {
     });
 });
 
-const { Election, Questions, Answers, Admin } = require("./models");
+const { Election, Questions, Answers, Admin, Voters } = require("./models");
 const saltRounds = 10;
 
 // Display landing page
@@ -146,7 +146,12 @@ app.post("/admins", async (request, response) => {
   // Create admin
   try {
     const { firstName, lastName, email } = request.body;
-    const admin = await Admin.createAdmin(firstName, lastName, email, hashPassword);
+    const admin = await Admin.createAdmin(
+      firstName,
+      lastName,
+      email,
+      hashPassword
+    );
     request.logIn(admin, (err) => {
       if (err) {
         console.log(err);
@@ -242,13 +247,33 @@ app.get(
     const electionId = request.params.id;
     const election = await Election.getElection(electionId);
     const questions = await Questions.getAllQuestions(electionId);
-    response.render("manageElection", {
-      title: "Manage Election | Online Voting Platform",
-      csrfToken: request.csrfToken(),
-      isSignedIn: true,
-      election,
-      questions,
-    });
+    if(election.presentStatus == "Added"){
+      response.render("manageElection", {
+        title: "Manage Election | Online Voting Platform",
+        csrfToken: request.csrfToken(),
+        isSignedIn: true,
+        election,
+        questions,
+      });
+    }else if( election.presentStatus == "Launched"){
+      response.render("launchElection", {
+        title: "Manage Election | Online Voting Platform",
+        csrfToken: request.csrfToken(),
+        isSignedIn: true,
+        election,
+        questions,
+      });
+    }
+    else if( election.presentStatus == "Ended"){
+      response.render("endElection", {
+        title: "Manage Election | Online Voting Platform",
+        csrfToken: request.csrfToken(),
+        isSignedIn: true,
+        election,
+        questions,
+      });
+    }
+    
   }
 );
 
@@ -291,7 +316,7 @@ app.get(
       csrfToken: request.csrfToken(),
       isSignedIn: true,
       electionId,
-      election
+      election,
     });
   }
 );
@@ -346,7 +371,7 @@ app.get(
         isSignedIn: true,
         question,
         getOptions,
-        election
+        election,
       });
     } catch (error) {
       console.log("Error message: ", error);
@@ -374,18 +399,49 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     console.log("Addition of new voters and ");
+    const electionId = request.params.id;
+    const election = await Election.getElection(electionId);
+    const getVoters = await Voters.findAll({
+      where: {
+        electionId
+      }
+    })
+    return response.render("addVoters.ejs", {
+      title: "Add Voters | Online Voting Platform",
+      csrfToken: request.csrfToken(),
+      isSignedIn: true,
+      election,
+      getVoters
+    });
   }
 );
 
-//
+app.post("/createVoters", async (request, response) => {
+  console.log("To create voters");
+  try {
+    const { electionId, voterId, password } = request.body;
+    console.log(electionId);
+    const voter = await Voters.create({
+      votersId: voterId,
+      votersPassword: password,
+      electionId,
+    });
+    return response.redirect('back');
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//Update the election status to launch
 app.put("/elections/:id/launch", async (request, response) => {
   console.log("Launch specific election.");
-  const election = await Election.getElection(request.params.id);
+  const electionId = request.params.id;
+  const election = await Election.getElection(electionId);
   try {
     const launch = await election.update({
-      presentStatus: "Launch",
+      presentStatus: "Launched",
     });
-    return response.json(launch);
+    return response.redirect(`/elections/${electionId}`);
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
