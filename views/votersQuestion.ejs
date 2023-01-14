@@ -9,10 +9,10 @@
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
   </head>
-  <body>x
+  <body>
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
-        <%- include('header.ejs') %>
+        <%- include('header2.ejs') %>
         <!-- <nav>
           <ul class="flex">
             <li class="flex-start">
@@ -34,27 +34,25 @@
         </nav> -->
         <h4 class="text-xl"></h4>
         <h1 class="text-4xl mt-6 font-bold">
-          <%= election.title %> - Question
+          <%= election.title %>
         </h1>
-        <p class="py-4 text-lg">
-          You have <%= questions.length %> questions in the ballot.
-        </p>
-        <p class="underline">
-          <a
-            class="text-blue-600 text-lg"
-            href="/elections/<%= election.id %>/questions/new"
-            >Create a questions</a
-          >
-        </p>
         <div class="py-6">
           <% if(questions.length > 0){%> 
             <% for(let i = 0; i < questions.length; i++){ %>
-              <p class="mb-4">
-                <%= i+1%>.
-                <a href="/questions/ <%= questions[i].id%>">
-                  <%= questions[i].question %>
-                </a>
-              </p>
+                <p class="text-lg font-semibold text-gray-600">
+                    Question #<%= i+1%>
+                </p>
+                <p class="text-xl font-bold text-gray-900">
+                    <%= questions[i].question%>
+                </p>
+                <p class="text-lg ml-2 font-normal text-gray-600">
+                    <%= questions[i].description%>
+                </p>
+                <p>
+                    <% for(let j = 0; j < getOptions.length; j++){ %>
+                    <%= getOptions[j].options %>
+                    <% }%> 
+                </p>
             <% }%> 
           <% }%>
         </div>

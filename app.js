@@ -142,9 +142,6 @@ passport.deserializeUser((user, done) => {
   
 });
 
-passport.deserializeUser((id, done) => {
-  
-});
 
 app.use(function (request, response, next) {
   response.locals.messages = request.flash();
@@ -179,6 +176,15 @@ app.get("/login", (request, response) => {
 });
 
 app.get("/signout", (request, response, next) => {
+  request.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    response.redirect("/");
+  });
+});
+
+app.get("/voterSignout", (request, response, next) => {
   request.logout((err) => {
     if (err) {
       return next(err);
@@ -541,12 +547,22 @@ app.get("/elections/:id/vote/question", async (request, response)=>{
   const electionId = request.params.id;
   const election = await Election.getElection(electionId);
   const questions = await Questions.getAllQuestions(electionId);
+  const questionLength = questions.length;
+  let getOptions;
+  let options = [];
+  let questionId ;
+  for(let i = 0; i < questionLength; i++){
+    questionId = questions[i].id;
+    getOptions = await Answers.getAllAnswers(questionId);
+    // console.log(getOptions[1]);
+  }
   return response.render("votersQuestion",{
     title: "Question | Online Voting Platform",
     csrfToken: request.csrfToken(),
-    isSignedIn: false,
+    isSignedIn: true,
     election,
-    questions
+    questions,
+    getOptions
   })
 });
 
