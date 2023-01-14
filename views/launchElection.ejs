@@ -27,24 +27,39 @@
           </ul>
         </nav>
         <h1 class="text-4xl mt-6 font-bold"><%= election.title %></h1>
+        <p class="mt-6 text-lg">
+          This election has been launched, and voters can access this URL:
+        </p>
         <p class="underline mt-4">
-          <a class="text-blue-600" href="/elections/<%= election.id %>/questions"
-            >Manage Questions</a
+          <a class="text-blue-600" href="/elections/<%= election.id %>/vote"
+            >URL will be generated here.</a
           >
         </p>
         <% if(questions.length == 0){%>
-          <p class="py-4">You haven't created any elections yet!</p>
+          <p class="mt-6 text-lg">You haven't created any questions yet!</p>
           <%}else{%>
-          <p class="py-4">You have created <%= questions.length%> questions in the ballot.</p>
+          <p class="mt-6 text-lg">You have created <%= questions.length%> questions in the ballot.</p>
           <%}%>
-        <p class="pb-4 underline">
+        <% if(voters.length == 0){%>
+          <p class="mt-6 text-lg">You haven't added any voters.</p>
+          <%}else{%>
+          <p class="mt-6 text-lg">Your election has <%= voters.length%> voters.</p>
+          <%}%>
+        
+          
+        <p class="my-6 underline">
             <a class="text-blue-600" href="/elections/<%= election.id %>/voters"
               >Manage Voters</a
             >
           </p>
-          <p class="underline">
+          <p class="my-6 underline">
+            <a class="text-blue-600" href="/elections/<%= election.id %>/results"
+              >Preview Results</a
+            >
+          </p>
+          <p class="my-6 underline">
             <a class="text-blue-600" href="/elections/<%= election.id %>"
-              >Launch election</a
+              >End election</a
             >
           </p>
       </div>

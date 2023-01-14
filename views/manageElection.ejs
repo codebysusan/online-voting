@@ -9,7 +9,23 @@
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
     <script>
+      
+      var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 
+      function launchElection(electionId){
+        fetch(`/elections/${electionId}/launch`,{
+          method: "put",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            "_csrf": token,
+            presentStatus: "Launched"
+          })
+        }).then((res) =>{
+          if(res.ok){
+            window.location.reload();
+          }
+        })
+      }
     </script>
   </head>
   <body>
@@ -21,9 +37,7 @@
             <li class="flex-start">
               <a href="/elections">Home</a>
             </li>
-            <span class="mx-3">
-              >>
-            </span>
+            <span class="mx-3"> >> </span>
             <li class="flex-start">
               <a href="/elections/<%=election.id%>"><%= election.title %></a>
             </li>
@@ -31,27 +45,29 @@
         </nav>
         <h1 class="text-4xl mt-6 font-bold"><%= election.title %></h1>
         <p class="underline mt-4">
-          <a class="text-blue-600" href="/elections/<%= election.id %>/questions"
+          <a
+            class="text-blue-600"
+            href="/elections/<%= election.id %>/questions"
             >Manage Questions</a
           >
         </p>
         <% if(questions.length == 0){%>
-          <p class="py-4">You haven't created any elections yet!</p>
-          <%}else{%>
-          <p class="py-4">You have created <%= questions.length%> questions in the ballot.</p>
-          <%}%>
+        <p class="py-4">You haven't created any elections yet!</p>
+        <%}else{%>
+        <p class="py-4">
+          You have created <%= questions.length%> questions in the ballot.
+        </p>
+        <%}%>
         <p class="pb-4 underline">
-            <a class="text-blue-600" href="/elections/<%= election.id %>/voters"
-              >Manage Voters</a
-            >
-          </p>
-          <p class="underline">
-            <a class="text-blue-600" onclick="launchElection">
-            <!-- href="/elections/<%= election.id %>/launch" -->
-
-              Launch election</a
-            >
-          </p>
+          <a class="text-blue-600" href="/elections/<%= election.id %>/voters"
+            >Manage Voters</a
+          >
+        </p>
+        <p class="underline">
+          <a class="text-blue-600" href="/elections/<%= election.id%>" onclick="{launchElection(<%=election.id%>)}">
+            Launch election</a
+          >
+        </p>
       </div>
     </div>
   </body>

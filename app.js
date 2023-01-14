@@ -25,6 +25,8 @@ app.use(csrf({ cookie: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.set("views", path.join(__dirname, "views"));
 app.use(flash());
+const { Election, Questions, Answers, Admin, Voters } = require("./models");
+const saltRounds = 10;
 
 app.use(
   session({
@@ -38,7 +40,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(
+passport.use('localAdmin',
   new LocalStrategy(
     {
       usernameField: "email",
@@ -58,7 +60,7 @@ passport.use(
           }
           const result = await bcrypt.compare(password, admin.password);
           if (result) {
-            return done(null, admin);
+            return done(null, admin, { type: "admin"});
           } else {
             return done(null, false, { message: "Invalid Credentials" });
           }
@@ -70,28 +72,85 @@ passport.use(
   )
 );
 
-app.use(function (request, response, next) {
-  response.locals.messages = request.flash();
-  next();
+passport.use('localVoter',
+  new LocalStrategy(
+    {
+      usernameField: "votersId",
+      passwordField: "votersPassword",
+    },
+    (username, password, done) => {
+      Voters.findOne({
+        where: {
+          votersId: username,
+        },
+      })
+        .then(async (voter) => {
+          console.log("We have got the voter...")
+          if (!voter) {
+            console.log("Invalid Credentials");
+            return done(null, false, {
+              message: "Invalid Credentials",
+            });
+          }
+          // const result = await bcrypt.compare(password, admin.password);
+          const result = password == voter.votersPassword;
+          console.log(voter);
+          if (result) {
+            return done(null, voter);
+          } else {
+            return done(null, false, { message: "Invalid Credentials" });
+          }
+        })
+        .catch((error) => {
+          console.log("We have error at line 105");
+          return error;
+        });
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  console.log("Serializing admin user in session", user.id);
+  done(null, user);
 });
 
-passport.serializeUser((admin, done) => {
-  console.log("Serializing user in session", admin.id);
-  done(null, admin.id);
+passport.serializeUser((voter, done) => {
+  console.log("Serializing voter user in session", voter.id);
+  done(null, voter);  
 });
 
-passport.deserializeUser((id, done) => {
-  Admin.findByPk(id)
+passport.deserializeUser((user, done) => {
+  const id = user.id;
+  const type = user.votersId ?? "admin";
+  if( type == "admin"){
+    Admin.findByPk(id)
     .then((admin) => {
       done(null, admin);
     })
     .catch((error) => {
       done(error, null);
     });
+  }else{
+    Voters.findByPk(id)
+    .then((voter) => {
+      done(null, voter);
+    })
+    .catch((error) => {
+      done(error, null);
+    });
+  }
+  
 });
 
-const { Election, Questions, Answers, Admin, Voters } = require("./models");
-const saltRounds = 10;
+passport.deserializeUser((id, done) => {
+  
+});
+
+app.use(function (request, response, next) {
+  response.locals.messages = request.flash();
+  next();
+});
+
 
 // Display landing page
 app.get("/", (request, response) => {
@@ -129,13 +188,25 @@ app.get("/signout", (request, response, next) => {
 });
 
 app.post(
-  "/session",
-  passport.authenticate("local", {
+  "/sessionAdmin",
+  passport.authenticate("localAdmin", {
     failureRedirect: "/login",
     failureFlash: true,
   }),
   (request, response) => {
     response.redirect("/elections");
+  }
+);
+
+app.post(
+  "/sessionVoter",
+  passport.authenticate("localVoter", {
+    failureRedirect: "/login",
+    failureFlash: true,
+  }),
+  (request, response) => {
+    const electionId = request.body.electionId;
+    response.redirect(`/elections/${electionId}/vote/question`);
   }
 );
 
@@ -247,24 +318,30 @@ app.get(
     const electionId = request.params.id;
     const election = await Election.getElection(electionId);
     const questions = await Questions.getAllQuestions(electionId);
-    if(election.presentStatus == "Added"){
+    const voters = await Voters.findAll({
+      where: {
+        electionId,
+      },
+    });
+    if (election.presentStatus == "Added") {
       response.render("manageElection", {
         title: "Manage Election | Online Voting Platform",
         csrfToken: request.csrfToken(),
         isSignedIn: true,
         election,
         questions,
+        voters,
       });
-    }else if( election.presentStatus == "Launched"){
+    } else if (election.presentStatus == "Launched") {
       response.render("launchElection", {
         title: "Manage Election | Online Voting Platform",
         csrfToken: request.csrfToken(),
         isSignedIn: true,
         election,
         questions,
+        voters,
       });
-    }
-    else if( election.presentStatus == "Ended"){
+    } else if (election.presentStatus == "Ended") {
       response.render("endElection", {
         title: "Manage Election | Online Voting Platform",
         csrfToken: request.csrfToken(),
@@ -273,7 +350,6 @@ app.get(
         questions,
       });
     }
-    
   }
 );
 
@@ -403,15 +479,15 @@ app.get(
     const election = await Election.getElection(electionId);
     const getVoters = await Voters.findAll({
       where: {
-        electionId
-      }
-    })
-    return response.render("addVoters.ejs", {
+        electionId,
+      },
+    });
+    return response.render("addVoters", {
       title: "Add Voters | Online Voting Platform",
       csrfToken: request.csrfToken(),
       isSignedIn: true,
       election,
-      getVoters
+      getVoters,
     });
   }
 );
@@ -426,7 +502,7 @@ app.post("/createVoters", async (request, response) => {
       votersPassword: password,
       electionId,
     });
-    return response.redirect('back');
+    return response.redirect("back");
   } catch (error) {
     console.log(error);
   }
@@ -446,6 +522,32 @@ app.put("/elections/:id/launch", async (request, response) => {
     console.log(error);
     return response.status(422).json(error);
   }
+});
+
+app.get("/elections/:id/vote", async (request, response) => {
+  console.log("Voters authentication page ");
+  const electionId = request.params.id;
+  const election = await Election.getElection(electionId);
+  return response.render("votersLogin", {
+    title: "Voters Login | Online Voting Platform",
+    csrfToken: request.csrfToken(),
+    isSignedIn: false,
+    election,
+  });
+});
+
+app.get("/elections/:id/vote/question", async (request, response)=>{
+  console.log("Question page for voters");
+  const electionId = request.params.id;
+  const election = await Election.getElection(electionId);
+  const questions = await Questions.getAllQuestions(electionId);
+  return response.render("votersQuestion",{
+    title: "Question | Online Voting Platform",
+    csrfToken: request.csrfToken(),
+    isSignedIn: false,
+    election,
+    questions
+  })
 });
 
 module.exports = app;

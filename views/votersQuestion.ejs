@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script class="" src="https://cdn.tailwindcss.com"></script>
+    <title><%= title %></title>
+  </head>
+  <body>x
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <%- include('header.ejs') %>
+        <!-- <nav>
+          <ul class="flex">
+            <li class="flex-start">
+              <a href="/elections">Home</a>
+            </li>
+            <span class="mx-3">
+              >>
+            </span>
+            <li class="flex-start">
+              <a href="/elections/<%=election.id%>"><%= election.title %></a>
+            </li>
+            <span class="mx-3">
+              >>
+            </span>
+            <li class="flex-start">
+              <a href="/elections/<%=election.id%>/questions">Questions</a>
+            </li>
+          </ul>
+        </nav> -->
+        <h4 class="text-xl"></h4>
+        <h1 class="text-4xl mt-6 font-bold">
+          <%= election.title %> - Question
+        </h1>
+        <p class="py-4 text-lg">
+          You have <%= questions.length %> questions in the ballot.
+        </p>
+        <p class="underline">
+          <a
+            class="text-blue-600 text-lg"
+            href="/elections/<%= election.id %>/questions/new"
+            >Create a questions</a
+          >
+        </p>
+        <div class="py-6">
+          <% if(questions.length > 0){%> 
+            <% for(let i = 0; i < questions.length; i++){ %>
+              <p class="mb-4">
+                <%= i+1%>.
+                <a href="/questions/ <%= questions[i].id%>">
+                  <%= questions[i].question %>
+                </a>
+              </p>
+            <% }%> 
+          <% }%>
+        </div>
+                    
+      </div>
+    </div>
+  </body>
+</html>

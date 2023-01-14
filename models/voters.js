@@ -22,6 +22,15 @@ module.exports = (sequelize, DataTypes) => {
         electionId,
       });
     }
+
+    static getVoter(votersId, electionId){
+      return this.findOne({
+        where:{
+          votersId,
+          electionId
+        }
+      });
+    }
   }
 
   Voters.init(
