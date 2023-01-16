@@ -18,9 +18,7 @@
             <li class="flex-start">
               <a href="/elections">Home</a>
             </li>
-            <span class="mx-3">
-              >>
-            </span>
+            <span class="mx-3"> >> </span>
             <li class="flex-start">
               <a href="/elections/<%=election.id%>"><%= election.title %></a>
             </li>
@@ -36,32 +34,36 @@
           >
         </p>
         <% if(questions.length == 0){%>
-          <p class="mt-6 text-lg">You haven't created any questions yet!</p>
-          <%}else{%>
-          <p class="mt-6 text-lg">You have created <%= questions.length%> questions in the ballot.</p>
-          <%}%>
-        <% if(voters.length == 0){%>
-          <p class="mt-6 text-lg">You haven't added any voters.</p>
-          <%}else{%>
-          <p class="mt-6 text-lg">Your election has <%= voters.length%> voters.</p>
-          <%}%>
-        
-          
+        <p class="mt-6 text-lg">You haven't created any questions yet!</p>
+        <%}else{%>
+        <p class="mt-6 text-lg">
+          You have created <%= questions.length%> questions in the ballot.
+        </p>
+        <%}%> <% if(voters.length == 0){%>
+        <p class="mt-6 text-lg">You haven't added any voters.</p>
+        <%}else{%>
+        <p class="mt-6 text-lg">
+          Your election has <%= voters.length%> voters.
+        </p>
+        <%}%>
+
         <p class="my-6 underline">
-            <a class="text-blue-600" href="/elections/<%= election.id %>/voters"
-              >Manage Voters</a
-            >
-          </p>
-          <p class="my-6 underline">
-            <a class="text-blue-600" href="/elections/<%= election.id %>/results"
-              >Preview Results</a
-            >
-          </p>
-          <p class="my-6 underline">
-            <a class="text-blue-600" href="/elections/<%= election.id %>"
-              >End election</a
-            >
-          </p>
+          <a class="text-blue-600" href="/elections/<%= election.id %>/voters">
+            Manage Voters
+          </a>
+        </p>
+        <p class="my-6 underline">
+          <a
+            class="text-blue-600"
+            href="/elections/<%= election.id %>/previewResults"
+            >Preview Results</a
+          >
+        </p>
+        <p class="my-6 underline">
+          <a class="text-blue-600" href="/elections/<%= election.id%>" onclick="{launchElection(<%=election.id%>)}"
+            >End election</a
+          >
+        </p>
       </div>
     </div>
   </body>

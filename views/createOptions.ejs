@@ -8,6 +8,27 @@
     <link rel="stylesheet" href="css/style.css" />
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
+    <script>
+      var token = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
+      function deleteOptions(id) {
+        // console.log(id);
+        fetch(`/options/${id}`, {
+          method: "delete",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            _csrf: token,
+          }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              window.location.reload();
+            }
+          })
+          .catch((err) => console.log(err));
+      }
+    </script>
   </head>
   <body>
     <div class="grid grid-cols-6">
@@ -18,27 +39,21 @@
             <li class="flex-start">
               <a href="/elections">Home</a>
             </li>
-            <span class="mx-3">
-              >>
-            </span>
+            <span class="mx-3"> >> </span>
             <li class="flex-start">
               <a href="/elections/<%=election.id%>"><%= election.title %></a>
             </li>
-            <span class="mx-3">
-              >>
-            </span>
+            <span class="mx-3"> >> </span>
             <li class="flex-start">
               <a href="/elections/<%=election.id%>/questions">Questions</a>
             </li>
-            <span class="mx-3">
-              >>
-            </span>
+            <span class="mx-3"> >> </span>
             <li class="flex-start">
               <a href="/questions/<%=question.id%>"><%= question.question%></a>
             </li>
           </ul>
         </nav>
-        <h1 class="text-4xl mt-6 font-bold">Question </h1>
+        <h1 class="text-4xl mt-6 font-bold">Question</h1>
         <p class="pt-4 font-medium text-xl"><%= question.question %></p>
         <form class="mt-4" method="post" action="/createOptions">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
@@ -70,25 +85,29 @@
             <% for(var i = 0; i < getOptions.length; i++){%>
             <li class="pt-2 text-lg">
               <div class="flex">
-                  
                 <div class="flex-auto">
-                    <div class="flex">
-                        <div class="flex-start pr-4">
-                            <p> <%= i+1 %>.</p>
-                        </div>
-                        <div class="flex-auto">
-                            <p> <%= getOptions[i].options %></p>
-                        </div>
+                  <div class="flex">
+                    <div class="flex-start pr-4">
+                      <p><%= i+1 %>.</p>
                     </div>
+                    <div class="flex-auto">
+                      <p><%= getOptions[i].options %></p>
+                    </div>
+                  </div>
                 </div>
                 <div class="flex-end px-8">
                   <p class="pb-4 underline">
-                    <a class="text-blue-600" href="">Edit</a>
+                    <a class="text-blue-600" href="/question/<%= question.id%>/editOption/<%=getOptions[i].id%>">Edit</a>
                   </p>
                 </div>
                 <div class="flex-end">
                   <p class="pb-4 underline">
-                    <a class="text-blue-600" href="">Delete</a>
+                    <a
+                      class="text-blue-600"
+                      href="#"
+                      onclick="{deleteOptions(<%= getOptions[i].id %>)}"
+                      >Delete</a
+                    >
                   </p>
                 </div>
               </div>

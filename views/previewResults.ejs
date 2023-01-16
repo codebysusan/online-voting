@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script class="" src="https://cdn.tailwindcss.com"></script>
+    <title><%= title %></title>
+  </head>
+  <body>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <%- include('header.ejs') %>
+        <nav>
+          <ul class="flex">
+            <li class="flex-start">
+              <a href="/elections">Home</a>
+            </li>
+            <span class="mx-3">
+              >>
+            </span>
+            <li class="flex-start">
+              <a href="/elections/<%=election.id%>"><%= election.title %></a>
+            </li>
+            <span class="mx-3">
+              >>
+            </span>
+            <li class="flex-start">
+              <a href="/elections/<%=election.id%>/previewResults">Preview Results</a>
+            </li>
+          </ul>
+        </nav>
+        <h1 class="text-4xl mt-6 font-bold">Preview Results</h1>
+        <p class="mt-6 text-lg">
+          Your data will be here.
+        </p>
+        
+      </div>
+    </div>
+  </body>
+</html>
