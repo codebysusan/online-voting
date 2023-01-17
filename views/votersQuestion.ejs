@@ -9,10 +9,10 @@
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
   </head>
-  <body>
+  <body>x
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
-        <%- include('header2.ejs') %>
+        <%- include('header.ejs') %>
         <!-- <nav>
           <ul class="flex">
             <li class="flex-start">
@@ -33,50 +33,30 @@
           </ul>
         </nav> -->
         <h4 class="text-xl"></h4>
-        <h1 class="text-4xl mt-6 font-bold"><%= election.title %></h1>
-        <div class="my-6">
-          <% if(questions.length == 0){%>
-
-          
-          <%}else if(questions.length > 0){%> 
-            <% for(let i = 0; i < questions.length;
-          i++){ %>
-          <div class="my-6">
-            <p class="text-base font-semibold text-gray-600">
-              Question #<%= i+1%>
-            </p>
-            <p class="text-xl font-bold text-gray-900">
-              <%= questions[i].question%>
-            </p>
-            <p class="text-lg ml-4 font-normal text-gray-600">
-              <%= questions[i].description%>
-            </p>
-            <div class="mt-4">
-              <% for(let j = 0; j < options[i].length; j++){ %>
-              <div class="mb-2">
-                <input
-                  class="w-4 h-4 text-blue-600 bg-gray border-gray-300"
-                  type="radio"
-                  id="question-<%= questions[i].id%>-options-<%=options[j].id%>"
-                  name="options"
-                  value="<%= options[i][j].option %>"
-                />
-                <label
-                  class="ml-2 text-lg text-gray-900 cursor-pointer"
-                  for="question-<%= questions[i].id%>-options-<%=options[j].id%>"
-                  ><%= options[i][j].options %></label
-                >
-              </div>
-
-              <% }%>
-            </div>
-            <% if( i < questions.length -1){ %>
-            <hr
-              class="mt-8"
-              style="height: 2px; color: gray; background-color: gray"
-            />
-            <% }%> <% }%> <% }%>
-          </div>
+        <h1 class="text-4xl mt-6 font-bold">
+          <%= election.title %> - Question
+        </h1>
+        <p class="py-4 text-lg">
+          You have <%= questions.length %> questions in the ballot.
+        </p>
+        <p class="underline">
+          <a
+            class="text-blue-600 text-lg"
+            href="/elections/<%= election.id %>/questions/new"
+            >Create a questions</a
+          >
+        </p>
+        <div class="py-6">
+          <% if(questions.length > 0){%> 
+            <% for(let i = 0; i < questions.length; i++){ %>
+              <p class="mb-4">
+                <%= i+1%>.
+                <a href="/questions/ <%= questions[i].id%>">
+                  <%= questions[i].question %>
+                </a>
+              </p>
+            <% }%> 
+          <% }%>
         </div>
         <button
           type="submit"
