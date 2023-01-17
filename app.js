@@ -12,6 +12,8 @@ const session = require("express-session");
 const LocalStrategy = require("passport-local");
 const bcrypt = require("bcrypt");
 const flash = require("connect-flash");
+const jwt = require("jsonwebtoken");
+
 app.use(bodyParser.json());
 
 // View engine
@@ -116,10 +118,10 @@ passport.serializeUser((user, done) => {
   done(null, user);
 });
 
-// passport.serializeUser((voter, done) => {
-//   console.log("Serializing voter user in session", voter.id);
-//   done(null, voter);
-// });
+passport.serializeUser((voter, done) => {
+  console.log("Serializing voter user in session", voter.id);
+  done(null, voter);
+});
 
 passport.deserializeUser((user, done) => {
   const id = user.id;
@@ -267,24 +269,28 @@ app.post(
   }
 );
 
-app.post("/sessionVoter", async(request, response) =>{
-  const {votersId, votersPassword} = request.body;
+app.post("/sessionVoter", async (request, response) => {
+  const { votersId, votersPassword } = request.body;
   const hashPassword = await bcrypt.hash(votersPassword, saltRounds);
   const voter = await Voters.findOne({
-    where:{
-      votersId
-    }
+    where: {
+      votersId,
+    },
   });
 
-  if(!voter){
+  const electionId = voter.electionId;
+
+  if (!voter) {
     console.log("Invalid credential!!!");
     // Flash message require with return page
   }
-  if(voter.votersPassword == hashPassword){
+  if (bcrypt.compare(voter.votersPassword,hashPassword)) {
+    var token = jwt.sign({ votersId }, "this_is_secret", { expiresIn: "1d" });
+    response.send({"token": token});
     console.log("Password has matched!!!");
-
-  }else{
-    console.log("You have entered wrong password!!!")
+    response.redirect(`/elections/${electionId}/vote/question`);
+  } else {
+    console.log("You have entered wrong password!!!");
   }
 });
 
@@ -536,7 +542,6 @@ app.get(
   }
 );
 
-
 //Update the election status to launch
 app.put(
   "/elections/:id/launch",
@@ -690,21 +695,23 @@ app.post("/updateOptions/:optionId", async (request, response) => {
   return response.redirect(`/questions/${questionId}`);
 });
 
-
 // Voters Section Below
 
-app.get("/elections/:id/vote", connectEnsureLogin.ensureLoggedIn(),
-async (request, response) => {
-  console.log("Voters authentication page ");
-  const electionId = request.params.id;
-  const election = await Election.getElection(electionId);
-  return response.render("votersLogin", {
-    title: "Voters Login | Online Voting Platform",
-    csrfToken: request.csrfToken(),
-    isSignedIn: false,
-    election,
-  });
-});
+app.get(
+  "/elections/:id/vote",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    console.log("Voters authentication page ");
+    const electionId = request.params.id;
+    const election = await Election.getElection(electionId);
+    return response.render("votersLogin", {
+      title: "Voters Login | Online Voting Platform",
+      csrfToken: request.csrfToken(),
+      isSignedIn: false,
+      election,
+    });
+  }
+);
 
 app.get("/elections/:id/vote/question", async (request, response) => {
   console.log("Question page for voters");
