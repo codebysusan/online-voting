@@ -12,8 +12,6 @@ const session = require("express-session");
 const LocalStrategy = require("passport-local");
 const bcrypt = require("bcrypt");
 const flash = require("connect-flash");
-const jwt = require("jsonwebtoken");
-
 app.use(bodyParser.json());
 
 // View engine
@@ -63,7 +61,7 @@ passport.use(
           }
           const result = await bcrypt.compare(password, admin.password);
           if (result) {
-            return done(null, admin, { type: "admin" });
+            return done(null, admin);
           } else {
             return done(null, false, { message: "Invalid Credentials" });
           }
@@ -75,68 +73,71 @@ passport.use(
   )
 );
 
-// passport.use(
-//   "localVoter",
-//   new LocalStrategy(
-//     {
-//       usernameField: "votersId",
-//       passwordField: "votersPassword",
-//     },
-//     (username, password, done) => {
-//       Voters.findOne({
-//         where: {
-//           votersId: username,
-//         },
-//       })
-//         .then(async (voter) => {
-//           console.log("We have got the voter...");
-//           if (!voter) {
-//             console.log("Invalid Credentials");
-//             return done(null, false, {
-//               message: "Invalid Credentials",
-//             });
-//           }
-//           // const result = await bcrypt.compare(password, admin.password);
-//           const result = password == voter.votersPassword;
-//           console.log(voter);
-//           if (result) {
-//             return done(null, voter);
-//           } else {
-//             return done(null, false, { message: "Invalid Credentials" });
-//           }
-//         })
-//         .catch((error) => {
-//           console.log("We have error at line 105");
-//           return error;
-//         });
-//     }
-//   )
-// );
+passport.use(
+  "localVoter",
+  new LocalStrategy(
+    {
+      usernameField: "votersId",
+      passwordField: "votersPassword",
+      passReqToCallback: true
+    },
+    (request, username, password, done) => {
+      const {electionId} = request.body;
+      Voters.findOne({
+        where: {
+          votersId: username,
+          electionId
+        },
+      })
+        .then(async (voter) => {
+          console.log("We have got the voter...");
+          if (!voter) {
+            console.log("Invalid Credentials");
+            return done(null, false, {
+              message: "Invalid Credentials",
+            });
+          }
+          const result = await bcrypt.compare(password, voter.votersPassword);
+          console.log(voter);
+          if (result) {
+            return done(null, voter);
+          } else {
+            return done(null, false, { message: "Invalid Credentials" });
+          }
+        })
+        .catch((error) => {
+          console.log("We have error at line 108");
+          return error;
+        });
+    }
+  )
+);
 
 passport.serializeUser((user, done) => {
   console.log("Serializing admin user in session", user.id);
   done(null, user);
 });
 
-passport.serializeUser((voter, done) => {
-  console.log("Serializing voter user in session", voter.id);
-  done(null, voter);
-});
-
 passport.deserializeUser((user, done) => {
   const id = user.id;
-  // const type = user.votersId ?? "admin";
-  Admin.findByPk(id)
-    .then((admin) => {
-      done(null, admin);
-    })
-    .catch((error) => {
-      done(error, null);
-    });
-});
-
-passport.deserializeUser((id, done) => {
-  
+  const type = user.votersId ?? "admin";
+  if (type == "admin") {
+    Admin.findByPk(id)
+      .then((admin) => {
+        done(null, admin);
+      })
+      .catch((error) => {
+        done(error, null);
+      });
+  } else {
+    Voters.findByPk(id)
+      .then((voter) => {
+        done(null, voter);
+      })
+      .catch((error) => {
+        done(error, null);
+      });
+  }
 });
 
 app.use(function (request, response, next) {
@@ -190,17 +191,25 @@ app.post(
   }
 );
 
-// app.post(
-//   "/sessionVoter",
-//   passport.authenticate("localVoter", {
-//     failureRedirect: "/login",
-//     failureFlash: true,
-//   }),
-//   (request, response) => {
-//     const electionId = request.body.electionId;
-//     response.redirect(`/elections/${electionId}/vote/question`);
-//   }
-// );
+app.post(
+  "/sessionVoter",
+  passport.authenticate("localVoter", {
+    failureRedirect: `/`,
+    failureFlash: true,
+    // passReqToCallback: true
+    // Ask this to tasnimul for failure redirect route
+  }),
+  (request, response) => {
+    const electionId = request.body.electionId;
+    response.redirect(`/elections/${electionId}/vote/question`);
+    // const userElectionId = request.user.electionId;
+    // if (electionId == userElectionId) {
+    // } else {
+    //   console.log("User hasn't been registered!!!");
+    //   response.redirect("back");
+    // }
+  }
+);
 
 app.post("/admins", async (request, response) => {
   // Hashed Password using bcrypt
@@ -263,31 +272,6 @@ app.post(
     }
   }
 );
-
-app.post("/sessionVoter", async (request, response) => {
-  const { votersId, votersPassword } = request.body;
-  const hashPassword = await bcrypt.hash(votersPassword, saltRounds);
-  const voter = await Voters.findOne({
-    where: {
-      votersId,
-    },
-  });
-
-  const electionId = voter.electionId;
-
-  if (!voter) {
-    console.log("Invalid credential!!!");
-    // Flash message require with return page
-  }
-  if (bcrypt.compare(voter.votersPassword,hashPassword)) {
-    var token = jwt.sign({ votersId }, "this_is_secret", { expiresIn: "1d" });
-    response.send({"token": token});
-    console.log("Password has matched!!!");
-    response.redirect(`/elections/${electionId}/vote/question`);
-  } else {
-    console.log("You have entered wrong password!!!");
-  }
-});
 
 // Display elections
 app.get(
@@ -694,7 +678,7 @@ app.post("/updateOptions/:optionId", async (request, response) => {
 
 app.get(
   "/elections/:id/vote",
-  connectEnsureLogin.ensureLoggedIn(),
+  // connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     console.log("Voters authentication page ");
     const electionId = request.params.id;
@@ -713,13 +697,57 @@ app.get("/elections/:id/vote/question", async (request, response) => {
   const electionId = request.params.id;
   const election = await Election.getElection(electionId);
   const questions = await Questions.getAllQuestions(electionId);
-  return response.render("votersQuestion",{
-    title: "Question | Online Voting Platform",
-    csrfToken: request.csrfToken(),
-    isSignedIn: false,
-    election,
-    questions
-  })
+  const questionLength = questions.length;
+  let getOptions;
+  let options = [];
+  let questionId;
+  for (let i = 0; i < questionLength; i++) {
+    questionId = questions[i].id;
+    getOptions = await Answers.getAllAnswers(questionId);
+    options.push(getOptions);
+  }
+
+  if (election.presentStatus == "Launched") {
+    return response.render("votersQuestion", {
+      title: "Question | Online Voting Platform",
+      csrfToken: request.csrfToken(),
+      isSignedIn: true,
+      election,
+      questions,
+      options,
+    });
+  } else {
+    return response.redirect(`/elections/${electionId}/vote`);
+  }
 });
+
+app.post("/formData", async (request, response)=>{
+  const {electionId} = request.body;
+  const election = await Election.getElection(electionId);
+  const questionsList = await Questions.getAllQuestions(electionId);
+  const questionLength = questionsList.length;
+  let questionId;
+  let answer ;
+  // console.log(request.user);
+  // console.log(request.body);
+  for(let i = 0; i <questionLength; i++){
+    let string = `options${i}`;
+    let option = request.body[string];
+    console.log(option);
+    questionId = questionsList[i].id;
+    answer = await Answers.findOne({
+      where:{
+        questionId,
+      }
+    });
+    // if(answer.options == option){
+    //   // Need to create count column here 
+    //   answer.count = answer.count+1;
+    // }
+  }
+  // Use spread operator here 
+  response.redirect('back');
+});
+
 
 module.exports = app;
