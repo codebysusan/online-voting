@@ -37,7 +37,16 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
-    static getElection(id) {
+    static getElection(id, adminId) {
+      return this.findOne({
+        where:{
+          id,
+          adminId
+        }
+      });
+    }
+
+    static getElectionVoters(id){
       return this.findByPk(id);
     }
   }

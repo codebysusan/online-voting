@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="<%= csrfToken %>" />
     <meta name="questions" content="<%= questions %>" />
-
     <link rel="stylesheet" href="/css/style.css" />
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
@@ -16,12 +15,12 @@
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
 
-      const questions = document
-        .querySelector('meta[name="questions"]')
-        .getAttribute("content");
+      // const questions = document
+      //   .querySelector('meta[name="questions"]')
+      //   .getAttribute("content");
 
       function deleteQuestion(id) {
-        console.log(questions);
+        // console.log(questions);
         console.log(id);
         fetch(`/question/${id}`, {
           method: "delete",
@@ -101,8 +100,7 @@
             <div class="flex-end">
               <p class="pb-4 underline">
                 <a
-                  class="text-blue-600"
-                  href="#"
+                  class="text-blue-600 hover:cursor-pointer"
                   onclick="{deleteQuestion(<%= questions[i].id %>)}"
                   >Delete</a
                 >
@@ -110,6 +108,7 @@
             </div>
           </div>
           <% }%> <% }%>
+          <!-- Need to add alert message here when admin try to delete last question of the ballot -->
         </div>
       </div>
     </div>

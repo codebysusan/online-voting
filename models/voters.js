@@ -36,10 +36,21 @@ module.exports = (sequelize, DataTypes) => {
   Voters.init(
     {
       votersId: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate:{
+          len:1,
+          notNull:true
+        }
       },
       votersPassword: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate:{
+          len:1,
+          notNull: true
+        }
       },
       electionId: {
         type: DataTypes.INTEGER
