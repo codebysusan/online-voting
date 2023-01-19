@@ -35,9 +35,15 @@ module.exports = (sequelize, DataTypes) => {
 
   Voters.init(
     {
-      votersId: DataTypes.STRING,
-      votersPassword: DataTypes.STRING,
-      electionId: DataTypes.INTEGER
+      votersId: {
+        type: DataTypes.STRING
+      },
+      votersPassword: {
+        type: DataTypes.STRING
+      },
+      electionId: {
+        type: DataTypes.INTEGER
+      }
     },
     {
       sequelize,

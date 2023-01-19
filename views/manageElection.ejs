@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/style.css" />
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
+    <script src="./js/index.js"></script>
     <script>
       
       var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
@@ -27,6 +28,7 @@
         })
       }
     </script>
+    <script src="./js/index.js"></script>
   </head>
   <body>
     <div class="grid grid-cols-6">
@@ -68,6 +70,14 @@
             Launch election</a
           >
         </p>
+        <% if(messages && messages.alert && messages.alert.length > 0)  { %>
+          <% for(var i=0; i<messages.alert.length; i++) { %>
+            <div id="alert-msg" class="p-4 mb-4 text-sm text-blue-800 bg-blue-100 rounded-lg dark:bg-gray-800 dark:text-blue-400 fade-out" role="alert">
+              <%= messages.alert[i] %>
+            </div>
+          <% } %>
+        <% } %>
+        <!-- Need to add request flash message here  -->
       </div>
     </div>
   </body>

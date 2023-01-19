@@ -3,3 +3,16 @@
   font-family: sans-serif;
   font-size: large;
 }
+
+.fade-out{
+  animation: fadeOut 3s;
+}
+
+@keyframes fadeOut{
+  from{
+    opacity: 1;
+  }
+  to{
+    opacity: 0;
+  }
+}

@@ -197,7 +197,7 @@ app.post(
     failureRedirect: `/`,
     failureFlash: true,
     // passReqToCallback: true
-    // Ask this to tasnimul for failure redirect route
+    // Work for failure redirect route
   }),
   (request, response) => {
     const electionId = request.body.electionId;
@@ -233,11 +233,11 @@ app.post("/admins", async (request, response) => {
   } catch (error) {
     console.log(error);
     if (error.name == "SequelizeUniqueConstraintError") {
-      request.flash("alert", "Email already in use.");
+      request.flash("alert", "User Already Exists.");
       return response.redirect("/signup");
     }
     if (error.errors[0].message == "Validation len on firstName failed") {
-      request.flash("alert", "First name is required.");
+      request.flash("alert", "Enter First Name");
       return response.redirect("/signup");
     }
 
@@ -529,11 +529,24 @@ app.put(
     console.log("Launch specific election.");
     const electionId = request.params.id;
     const election = await Election.getElection(electionId);
+    const questionsList = await Questions.getAllQuestions(electionId);
+    const questionLength = questionsList.length;
+    let questionId;
+    for (let i = 0; i < questionLength; i++) {
+      questionId = questionsList[i].id;
+      getOptions = await Answers.getAllAnswers(questionId);
+      if( getOptions.length <= 2){
+        console.log("Every options must have 2 options");
+        request.flash("alert","Question must have 2 options");
+        return response.redirect('back');
+        // return from here with flash message "Every questions must have minimum 2 options"
+      }
+    }
     try {
       const launch = await election.update({
         presentStatus: "Launched",
       });
-      return response.redirect(`/elections/${electionId}`);
+      return response.redirect('back');
     } catch (error) {
       console.log(error);
       return response.status(422).json(error);
@@ -577,6 +590,22 @@ app.delete("/options/:id", async function (request, response) {
       },
     });
     option ? response.json(true) : response.json(false);
+  } catch (error) {
+    console.log(error);
+    return response.status(422).json(error);
+  }
+});
+
+app.delete("/voters/:id", async function (request, response) {
+  const {id} = request.params;
+  console.log(request.user);
+  try {
+    const voter = await Voters.destroy({
+      where: {
+        id,
+      },
+    });
+    voter ? response.json(true) : response.json(false);
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
