@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="<%= csrfToken %>" />
     <meta name="questions" content="<%= questions %>" />
+    <!-- Need to check the meta tags -->
     <link rel="stylesheet" href="/css/style.css" />
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
@@ -14,10 +15,6 @@
       var token = document
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
-
-      // const questions = document
-      //   .querySelector('meta[name="questions"]')
-      //   .getAttribute("content");
 
       function deleteQuestion(id) {
         // console.log(questions);
@@ -42,18 +39,23 @@
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
         <%- include('header.ejs') %>
-        <nav>
+      </div>
+    </div>
+    <hr>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <nav class="mt-8">
           <ul class="flex">
             <li class="flex-start">
-              <a href="/elections">Home</a>
+              <a class="text-blue-800" href="/elections">Home</a>
             </li>
-            <span class="mx-3"> >> </span>
+            <span class="mx-3 text-blue-800"> >> </span>
             <li class="flex-start">
-              <a href="/elections/<%=election.id%>"><%= election.title %></a>
+              <a class="text-blue-800" href="/elections/<%=election.id%>"><%= election.title %></a>
             </li>
-            <span class="mx-3"> >> </span>
+            <span class="mx-3 text-blue-800"> >> </span>
             <li class="flex-start">
-              <a href="/elections/<%=election.id%>/questions">Questions</a>
+              <a class="text-blue-800" href="/elections/<%=election.id%>/questions">Questions</a>
             </li>
           </ul>
         </nav>

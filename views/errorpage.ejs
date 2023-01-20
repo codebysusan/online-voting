@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script class="" src="https://cdn.tailwindcss.com"></script>
+    <title><%= title %></title>
+    <script src="/js/index.js"></script>
+  </head>
+  <body>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <%- include('header.ejs') %>
+      </div>
+    </div>
+    <hr />
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <nav class="my-8">
+            <ul class="flex">
+              <li class="flex-start">
+                <a class="text-blue-800" href="/elections">Home</a>
+              </li>
+            </ul>
+          </nav>
+        <p class="text-2xl">
+          <%= errormsg %>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

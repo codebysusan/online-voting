@@ -194,16 +194,21 @@ app.post(
 app.post(
   "/sessionVoter",
   passport.authenticate("localVoter", {
-    failureRedirect: `/`,
+    failureRedirect: `/voters/login`,
     failureFlash: true,
-    // passReqToCallback: true
-    // Work for failure redirect route
+    
   }),
   (request, response) => {
     const electionId = request.body.electionId;
     response.redirect(`/elections/${electionId}/vote/question`);
   }
 );
+
+app.get("/voters/login", async (request, response)=>{
+  console.log(request.body);
+  return response.redirect("/")
+});
+
 
 app.post("/admins", async (request, response) => {
   // Hashed Password using bcrypt
@@ -391,8 +396,13 @@ app.get(
         });
       }
     } else {
-      response.redirect("/signout");
-      // return response.redirect("/login");
+      // response.redirect("/signout");
+      return response.render("errorpage",{
+        title: "Error Page | Online Voting Platform",
+        csrfToken: request.csrfToken(),
+        isSignedIn: true,
+        errormsg: "This is not the webpage you are looking for."
+      });
     }
   }
 );
@@ -409,6 +419,15 @@ app.get(
     const election = await Election.getElection(electionId, adminId);
     const questions = await Questions.getAllQuestions(electionId);
     if (election != null) {
+      if(election.presentStatus == "Launched"){
+      
+        return response.render("errorpage",{
+          title: "Error Page | Online Voting Platform",
+          csrfToken: request.csrfToken(),
+          isSignedIn: true,
+          errormsg: "Election has already been launched. Administrator can't edit the ballot of questions."
+        });
+      }
       if (request.accepts("html")) {
         return response.render("question", {
           title: "Create Questions | Online Voting Platform",
@@ -421,7 +440,13 @@ app.get(
         return response.json(questions);
       }
     } else {
-      response.redirect("/signout");
+      return response.render("errorpage",{
+        title: "Error Page | Online Voting Platform",
+        csrfToken: request.csrfToken(),
+        isSignedIn: true,
+        errormsg: "This is not the webpage you are looking for."
+      });
+      // response.redirect("/signout");
     }
   }
 );
@@ -444,7 +469,13 @@ app.get(
         election,
       });
     } else {
-      response.redirect("/signup");
+      // response.redirect("/signup");
+      return response.render("errorpage",{
+        title: "Error Page | Online Voting Platform",
+        csrfToken: request.csrfToken(),
+        isSignedIn: true,
+        errormsg: "This is not the webpage you are looking for."
+      });
     }
   }
 );
@@ -499,7 +530,13 @@ app.get(
           election,
         });
       } else {
-        return response.redirect("/signout");
+        // return response.redirect("/signout");
+        return response.render("errorpage",{
+          title: "Error Page | Online Voting Platform",
+          csrfToken: request.csrfToken(),
+          isSignedIn: true,
+          errormsg: "This is not the webpage you are looking for."
+        });
       }
     } catch (error) {
       console.log("Error message: ", error);
@@ -548,7 +585,13 @@ app.get(
           getVoters,
         });
       } else {
-        response.redirect("/signout");
+        // response.redirect("/signout");
+        return response.render("errorpage",{
+          title: "Error Page | Online Voting Platform",
+          csrfToken: request.csrfToken(),
+          isSignedIn: true,
+          errormsg: "This is not the webpage you are looking for."
+        });
       }
     } catch (error) {
       console.log(error);
@@ -588,7 +631,13 @@ app.put(
         });
         return response.redirect(`/elections/${electionId}`);
       } else {
-        response.redirect("/signout");
+        // response.redirect("/signout");
+        return response.render("errorpage",{
+          title: "Error Page | Online Voting Platform",
+          csrfToken: request.csrfToken(),
+          isSignedIn: true,
+          errormsg: "This is not the webpage you are looking for."
+        });
       }
     } catch (error) {
       console.log(error);
@@ -765,7 +814,13 @@ app.get(
           question,
         });
       } else {
-        response.redirect("/signout");
+        // response.redirect("/signout");
+        return response.render("errorpage",{
+          title: "Error Page | Online Voting Platform",
+          csrfToken: request.csrfToken(),
+          isSignedIn: true,
+          errormsg: "This is not the webpage you are looking for."
+        });
       }
     } catch (error) {
       console.log(error);

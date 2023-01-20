@@ -14,6 +14,11 @@
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
         <%- include('header.ejs')%>
+      </div>
+    </div>
+    <hr class="mt-8">
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
         <h6 class="py-4 text-2xl font-bold text-center">Signup</h6>
         <form action="/admins" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />

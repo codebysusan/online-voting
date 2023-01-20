@@ -1,6 +1,13 @@
-<h1 class="text-4xl mt-6 font-bold" style="text-align: center">
-  Online Voting Platform
-</h1>
+
 <% if(isSignedIn)  { %>
-    <h1 class="text-end underline py-4"><a href="/signout"> Sign out </a></h1>
-  <% } %>
+  <h1 class="mt-6" style="text-align: center">
+    <a class="text-4xl  font-bold" href="/elections">Online Voting Platform</a>
+  </h1>
+<% } else{%>
+  <h1 class=" mt-6" style="text-align: center">
+    <a class="text-4xl font-bold" href="/login">Online Voting Platform</a>
+  </h1>
+<% } %>
+<% if(isSignedIn)  { %>
+    <h1 class="text-end text-blue-600 py-4"><a href="/signout"> Sign out </a></h1>
+<% } %>
