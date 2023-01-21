@@ -23,7 +23,9 @@
           })
         }).then((res) =>{
           if(res.ok){
-            window.location.reload();
+            console.log("this is res")
+            console.log(res);
+            window.location.href(`/elections/${electionId}`);
           }
         })
       }
@@ -72,7 +74,10 @@
           >
         </p>
         <p class="underline">
-          <a class="text-blue-600" href="/elections/<%= election.id%>" onclick="{launchElection(<%=election.id%>)}">
+          <!-- <a class="text-blue-600" href="/elections/<%= election.id%>" onclick="{launchElection(<%=election.id%>)}">
+            Launch election</a
+          > -->
+          <a class="text-blue-600" href="/elections/<%= election.id%>/previewBallot">
             Launch election</a
           >
         </p>

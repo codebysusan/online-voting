@@ -16,17 +16,19 @@
         <%- include('header.ejs') %>
       </div>
     </div>
-    <hr />
+    <hr class="my-8" />
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
-        <nav class="my-8">
+        <% if( isAdmin ){%>
+          <nav>
             <ul class="flex">
               <li class="flex-start">
                 <a class="text-blue-800" href="/elections">Home</a>
               </li>
             </ul>
           </nav>
-        <p class="text-2xl">
+        <% }%>
+        <p class="text-4xl font-bold text-center mt-4">
           <%= errormsg %>
         </p>
       </div>

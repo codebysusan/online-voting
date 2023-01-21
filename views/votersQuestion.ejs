@@ -12,6 +12,12 @@
   <body>
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
+        <%- include('votersheader.ejs') %>
+      </div>
+    </div>
+    <hr>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
         <form action="/formData" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <input type="hidden" name="electionId" value="<%= election.id %>" />
