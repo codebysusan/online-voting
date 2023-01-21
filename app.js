@@ -660,6 +660,7 @@ app.put(
         }
         const launch = await election.update({
           presentStatus: "Launched",
+          url: `https://online-voting-08vr.onrender.com/elections/${electionId}/vote`,
         });
         console.log("Launch completed");
         response.redirect("back");
@@ -1024,6 +1025,12 @@ app.get(
             questions,
             options,
           });
+        } else if (election.presentStatus == "Ended") {
+          return response.render("electionEnded", {
+            title: "Election Ended | Online Voting Platform",
+            csrfToken: request.csrfToken(),
+            isSignedIn: true,
+          });
         } else {
           return response.redirect(`/elections/${electionId}/vote`);
         }
@@ -1044,25 +1051,32 @@ app.get(
 );
 
 // Below route is yet to be completed
-app.post("/formData", async (request, response) => {
-  const { electionId } = request.body;
-  const election = await Election.getVotersElection(electionId);
-  const questionsList = await Questions.getAllQuestions(electionId);
-  const questionLength = questionsList.length;
-  let questionId;
-  let answer;
-  for (let i = 0; i < questionLength; i++) {
-    let string = `options${i}`;
-    let option = request.body[string];
-    console.log(option);
-    questionId = questionsList[i].id;
-    answer = await Answers.findOne({
-      where: {
-        questionId,
-      },
-    });
+app.post(
+  "/submitElection",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    const user = request.user;
+    const isVoter = checkVoter(user);
+    if (isVoter) {
+      const { electionId } = request.body;
+      const election = await Election.getVotersElection(electionId);
+      const questionsList = await Questions.getAllQuestions(electionId);
+      const questionLength = questionsList.length;
+      let questionId;
+      let answer;
+      for (let i = 0; i < questionLength; i++) {
+        let optIndex = `options${i}`;
+        let option = request.body[optIndex];
+        questionId = questionsList[i].id;
+        answer = await Answers.findOne({
+          where: {
+            questionId,
+          },
+        });
+      }
+      response.redirect("back");
+    }
   }
-  response.redirect("back");
-});
+);
 
 module.exports = app;

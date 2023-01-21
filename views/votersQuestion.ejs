@@ -18,7 +18,7 @@
     <hr>
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
-        <form action="/formData" method="post">
+        <form action="/submitElection" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <input type="hidden" name="electionId" value="<%= election.id %>" />
           <h4 class="text-xl"></h4>
@@ -44,7 +44,8 @@
                     type="radio"
                     id="question-<%= questions[i].id%>-options-<%=options[i][j].id%>"
                     name="options<%=i%>"
-                    value="<%= options[i][j].options %>"
+                    value="<%= options[i][j].id%>"
+                    required
                   />
                   <label
                     class="ml-2 text-lg text-gray-900 cursor-pointer"
