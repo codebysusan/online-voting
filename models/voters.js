@@ -54,6 +54,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       electionId: {
         type: DataTypes.INTEGER
+      },
+      voted:{
+        type: DataTypes.BOOLEAN
       }
     },
     {

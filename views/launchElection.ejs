@@ -9,6 +9,25 @@
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
     <script src="/js/index.js"></script>
+    <script>
+      var token = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
+      function endElection(electionId) {
+        fetch(`/elections/${electionId}/end`, {
+          method: "put",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            _csrf: token,
+            presentStatus: "Ended",
+          }),
+        }).then((res) => {
+          if (res.ok) {
+            window.location.reload();
+          }
+        });
+      }
+    </script>
   </head>
   <body>
     <div class="grid grid-cols-6">
@@ -66,7 +85,7 @@
           >
         </p>
         <p class="my-6 underline">
-          <a class="text-blue-600" href="/elections/<%= election.id%>" onclick="{launchElection(<%=election.id%>)}"
+          <a class="text-blue-600" href="/elections/<%= election.id%>" onclick="{endElection(<%=election.id%>)}"
             >End election</a
           >
         </p>
