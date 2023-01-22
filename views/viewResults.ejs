@@ -12,28 +12,13 @@
   <body>
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
-        <%- include('header.ejs') %>
+        <h1 class="mt-6 text-4xl font-bold" style="text-align: center">
+          Online Voting Platform
+        </h1>
       </div>
     </div>
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
-        <% if(isAdmin){%>
-        <nav class="mt-8">
-          <ul class="flex">
-            <li class="flex-start">
-              <a class="text-blue-800" class="text-blue-800" href="/elections">Home</a>
-            </li>
-            <span class="mx-3 text-blue-800"> >> </span>
-            <li class="flex-start">
-              <a class="text-blue-800" href="/elections/<%=election.id%>"><%= election.title %></a>
-            </li>
-            <span class="mx-3 text-blue-800"> >> </span>
-            <li class="flex-start">
-              <a class="text-blue-800" href="/elections/<%=election.id%>/viewResults">Preview Results</a>
-            </li>
-          </ul>
-        </nav>
-        <% }%>
         <h1 class="text-4xl mt-6 font-bold">Election Results</h1>
         <p class="mt-6 text-lg">
           Your data will be here.

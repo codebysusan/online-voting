@@ -8,6 +8,7 @@
     <meta name="questions" content="<%= questions %>" />
     <!-- Need to check the meta tags -->
     <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/index.js"></script>
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
 
@@ -37,11 +38,9 @@
   </head>
   <body>
     <div class="grid grid-cols-6">
-      <div class="col-start-3 col-span-2">
-        <%- include('header.ejs') %>
-      </div>
+      <div class="col-start-3 col-span-2"><%- include('header.ejs') %></div>
     </div>
-    <hr>
+    <hr />
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
         <nav class="mt-8">
@@ -51,11 +50,17 @@
             </li>
             <span class="mx-3 text-blue-800"> >> </span>
             <li class="flex-start">
-              <a class="text-blue-800" href="/elections/<%=election.id%>"><%= election.title %></a>
+              <a class="text-blue-800" href="/elections/<%=election.id%>"
+                ><%= election.title %></a
+              >
             </li>
             <span class="mx-3 text-blue-800"> >> </span>
             <li class="flex-start">
-              <a class="text-blue-800" href="/elections/<%=election.id%>/questions">Questions</a>
+              <a
+                class="text-blue-800"
+                href="/elections/<%=election.id%>/questions"
+                >Questions</a
+              >
             </li>
           </ul>
         </nav>
@@ -75,7 +80,7 @@
         <div class="py-6">
           <% if(questions.length > 0){%> <% for(let i = 0; i < questions.length;
           i++){ %>
-          <div class="flex">
+          <div class="flex  items-center">
             <div class="flex-auto">
               <div class="flex">
                 <div class="flex-start pr-4">
@@ -85,30 +90,54 @@
                   <a href="/questions/<%=questions[i].id%>"
                     ><%= questions[i].question %></a
                   >
-                  <p></p>
                 </div>
               </div>
             </div>
             <div class="flex-end px-8">
-              <p class="pb-4 underline">
+              <p class="py-4 underline">
                 <a
                   class="text-blue-600"
                   href="/question/<%= questions[i].id%>/edit"
-                  >Edit</a
                 >
+                  <button
+                    class="text-white bg-green-600 px-5 py-3 font-medium rounded hover:bg-green-800"
+                  >
+                    Edit
+                  </button>
+                </a>
               </p>
             </div>
             <div class="flex-end">
-              <p class="pb-4 underline">
-                <a
-                  class="text-blue-600 hover:cursor-pointer"
-                  onclick="{deleteQuestion(<%= questions[i].id %>)}"
-                  >Delete</a
-                >
-              </p>
+              <form action="/question/<%=questions[i].id%>" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <p class="py-4 underline">
+                  <!-- <a
+                    class="text-blue-600 hover:cursor-pointer"
+                    onclick="{deleteQuestion(<%= questions[i].id %>)}"
+                  > -->
+                    <button
+                    type="submit"
+                      class="text-white bg-green-600 px-2 py-3 font-medium rounded hover:bg-green-800"
+                    >
+                      Delete
+                    </button>
+                  </a>
+                </p>
+              </form>
+              
             </div>
           </div>
+          <hr>
           <% }%> <% }%>
+          <div class="mt-6">
+            <% if(messages && messages.alert && messages.alert.length > 0)  { %>
+              <% for(var i=0; i<messages.alert.length; i++) { %>
+                <div id="alert-msg" class="p-4 mb-4 text-sm text-blue-800 bg-blue-100 rounded-lg dark:bg-gray-800 dark:text-blue-400 fade-out" role="alert">
+                  <%= messages.alert[i]%>
+                </div>
+              <% } %>
+            <% } %>
+          </div>
           <!-- Need to add alert message here when admin try to delete last question of the ballot -->
         </div>
       </div>

@@ -58,8 +58,8 @@
             </li>
           </ul>
         </nav>
-        <h1 class="text-4xl mt-6 font-bold">Question</h1>
-        <p class="pt-4 font-medium text-xl"><%= question.question %></p>
+        <h1 class="text-4xl mt-6 font-bold"><%= question.question %></h1>
+        <p class="ml-6 pt-4 text-gray-500 font-medium text-xl"><%= question.description %></p>
         <form class="mt-4" method="post" action="/createOptions">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <input type="hidden" name="questionId" value="<%= question.id %>" />

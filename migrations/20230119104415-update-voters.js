@@ -10,11 +10,6 @@ module.exports = {
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
     
-    queryInterface.changeColumn("Voters", "votersId",{
-      type: Sequelize.STRING,
-      unique: true,
-      allowNull: false
-    });
 
     queryInterface.changeColumn("Voters", "votersPassword",{
       type: Sequelize.STRING,
@@ -34,12 +29,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-
-    queryInterface.changeColumn("Voters", "votersId", {
-      type: Sequelize.STRING,
-      unique: false,
-      allowNull: true
-    });
 
     queryInterface.changeColumn("Voters", "votersPassword",{
       type: Sequelize.STRING,

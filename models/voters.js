@@ -37,8 +37,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       votersId: {
         type: DataTypes.STRING,
+        unique:false,
         allowNull: false,
-        unique: true,
         validate:{
           len:1,
           notNull:true
