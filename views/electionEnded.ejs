@@ -20,7 +20,9 @@
       <div class="col-start-3 col-span-2">
         <h1 class="text-4xl my-6 font-bold"><%= election.title %> election has been ended.</h1>
         <p>You can view the result in the below link:</p>
-        <p class="my-3"></p>
+        <p class="my-3">
+          <a class="text-blue-800" href="elections/<%=election.id%>/viewResults">Result</a>
+        </p>
       </div>
     </div>
   </body>

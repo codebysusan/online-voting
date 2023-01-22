@@ -8,6 +8,8 @@
     <a class="text-4xl font-bold" href="/">Online Voting Platform</a>
   </h1>
 <% } %>
-<% if(isSignedIn)  { %>
+<% if(isSignedIn && isAdmin)  { %>
     <h1 class="text-end text-blue-600 py-4"><a href="/signout"> Sign out </a></h1>
-<% } %>
+<% } else if(isSignedIn){ %>
+  <h1 class="text-end text-blue-600 py-4"><a href="/signout/voters"> Sign out </a></h1>
+  <% }%>

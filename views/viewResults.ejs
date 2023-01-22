@@ -17,6 +17,7 @@
     </div>
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
+        <% if(isAdmin){%>
         <nav class="mt-8">
           <ul class="flex">
             <li class="flex-start">
@@ -28,11 +29,12 @@
             </li>
             <span class="mx-3 text-blue-800"> >> </span>
             <li class="flex-start">
-              <a class="text-blue-800" href="/elections/<%=election.id%>/previewResults">Preview Results</a>
+              <a class="text-blue-800" href="/elections/<%=election.id%>/viewResults">Preview Results</a>
             </li>
           </ul>
         </nav>
-        <h1 class="text-4xl mt-6 font-bold">Preview Results</h1>
+        <% }%>
+        <h1 class="text-4xl mt-6 font-bold">Election Results</h1>
         <p class="mt-6 text-lg">
           Your data will be here.
         </p>

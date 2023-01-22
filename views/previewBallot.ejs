@@ -5,28 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="<%= csrfToken %>" />
+    <meta name="electionId" content="<%= election.id %>" />
     <link rel="stylesheet" href="/css/style.css" />
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
-    <script>
-      var token = document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content");
-      function launchElection(electionId) {
-        fetch(`/elections/${electionId}/launch`, {
-          method: "put",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            _csrf: token,
-            presentStatus: "Launched",
-          }),
-        }).then((res) => {
-          if (res.ok) {
-            window.location.reload();
-          }
-        });
-      }
-    </script>
+    
   </head>
   <body>
     <div class="grid grid-cols-6">
@@ -51,46 +34,71 @@
             </ul>
           </nav>
         <h4 class="text-xl"></h4>
-        <h1 class="text-4xl mt-6 font-bold"><%= election.title %></h1>
-        <div class="my-6">
-          <% if(questions.length == 0){%> <%}else if(questions.length > 0){%> <%
-          for(let i = 0; i < questions.length; i++){ %>
+        <h1 class="text-4xl mt-6 font-bold"><%= election.title %> - Preview Ballot</h1>
+        <form action="/elections/<%=election.id%>/launch" method="post">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <div class="my-6">
-            <p class="text-base font-semibold text-gray-600">
-              Question #<%= i+1%>
-            </p>
-            <p class="text-xl font-bold text-gray-900">
-              <%= questions[i].question%>
-            </p>
-            <p class="text-lg ml-4 font-normal text-gray-600">
-              <%= questions[i].description%>
-            </p>
-            <div class="mt-4 mx-4">
-              <% for(let j = 0; j < options[i].length; j++){ %>
-              <div class="mb-2">
-                <%=j+1%>.
-                <%= options[i][j].options %>
+            <% if(questions.length == 0){%> <%}else if(questions.length > 0){%> <%
+            for(let i = 0; i < questions.length; i++){ %>
+            <div class="my-6">
+              <p class="text-base font-semibold text-gray-600">
+                Question #<%= i+1%>
+              </p>
+              <p class="text-xl font-bold text-gray-900">
+                <%= questions[i].question%>
+              </p>
+              <p class="text-lg ml-4 font-normal text-gray-600">
+                <%= questions[i].description%>
+              </p>
+              <div class="mt-4 mx-4">
+                <% for(let j = 0; j < options[i].length; j++){ %>
+                <div class="mb-2">
+                  <%=j+1%>.
+                  <%= options[i][j].options %>
+                </div>
+                <% }%>
               </div>
-              <% }%>
+              <% if( i < questions.length -1){ %>
+              <hr
+                class="mt-8"
+                style="height: 2px; color: gray; background-color: gray"
+              />
+              <% }%> <% }%> <% }%>
             </div>
-            <% if( i < questions.length -1){ %>
-            <hr
-              class="mt-8"
-              style="height: 2px; color: gray; background-color: gray"
-            />
-            <% }%> <% }%> <% }%>
-          </div>
-          <a class="text-blue-600" onclick="{launchElection(<%=election.id%>)}"  href="/elections/<%= election.id%>">
-            Launch election</a
-          >
-          <!-- <button
-          class="text-white bg-green-600 px-5 py-3 font-medium rounded hover:bg-green-800"
-          onclick="{launchElection(<%=election.id%>)}"
-        >
-          Launch
-        </button> -->
+            
+            <button
+            type="submit"
+            id="launchBtn"
+            class="text-white bg-green-600 px-5 py-3 font-medium rounded hover:bg-green-800">
+            Launch
+          </button>
+        </form>
         </div>
       </div>
     </div>
+    <!-- <script>
+      let token = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
+      let electionId = document
+        .querySelector('meta[name="electionId"]')
+        .getAttribute("content");
+      const launchBtn = document.getElementById("launchBtn");
+      launchBtn.addEventListener("click", async(e)=>{
+        e.preventDefault();
+        fetch(`/elections/${electionId}/launch`, {
+          method: "get",
+          headers: { "Content-Type": "application/json" },
+        }).then((res) => {
+          if (res.ok) {
+            window.location.reload();
+          }
+        });
+      })
+    
+      // function launchElection(electionId) {
+        
+      // }
+    </script> -->
   </body>
 </html>
