@@ -17,6 +17,7 @@ const login = async (agent, username, password) => {
   });
 };
 
+
 function extractCsrfToken(res) {
   var $ = cheerio.load(res.text);
   return $("[name=_csrf]").val();
@@ -51,6 +52,7 @@ describe("Online Voting Application", function () {
     expect(res.statusCode).toBe(302);
   });
 
+
   test("Sign out", async () => {
     let res = await agent.get("/elections");
     expect(res.statusCode).toBe(200);
@@ -60,16 +62,36 @@ describe("Online Voting Application", function () {
     expect(res.statusCode).toBe(302);
   });
 
+  // test("Sign in", async () =>{
+  //   let res = await agent.get("/login");
+  //   const csrfToken = extractCsrfToken(res);
+  //   let response = await agent.post("/session").send({
+  //     email: "susank@gmail.com",
+  //     password: "12345678",
+  //     _csrf: csrfToken,
+  //   });
+  //   expect(response.statusCode).toBe(302);
+  // });
+
+  // test("Sign out", async () => {
+  //   let res = await agent.get("/elections");
+  //   expect(res.statusCode).toBe(200);
+  //   res = await agent.get("/signout");
+  //   expect(res.statusCode).toBe(302);
+  //   res = await agent.get("/elections");
+  //   expect(res.statusCode).toBe(302);
+  // });
+
   // test("Creates a election and responds with json at /createElections POST endpoint", async () => {
   //   const agent = request.agent(server);
   //   await login(agent, "susank@gmail.com", "12345678");
   //   const res = await agent.get("/elections/new");
   //   const csrfToken = extractCsrfToken(res);
-  //   // console.log("This is for csrf token",csrfToken);
   //   const response = await agent.post("/createElections").send({
   //     title: "PM Election of Nepal",
   //     _csrf: csrfToken,
   //   });
+  //   console.log(response);
   //   expect(response.statusCode).toBe(302);
   // });
 
@@ -85,6 +107,7 @@ describe("Online Voting Application", function () {
   //   });
   //   // Checking whether the election is created or not.
   //   expect(createElection.statusCode).toBe(302);
+  // });
 
   //   // To find out the last index of election.
   //   const groupedElectionsResponse = await agent

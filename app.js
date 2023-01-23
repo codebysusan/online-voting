@@ -402,9 +402,14 @@ app.post(
     try {
       const admin = request.user;
       const adminId = admin.id;
-      const election = await Election.addElection(request.body.title, adminId);
+      const {title} = request.body;
+      const election = await Election.addElection(title, adminId);
       const id = election.id;
-      return response.redirect(`/elections/${id}`);
+      if(request.accepts("html")){
+        return response.status.redirect(`/elections/${id}`);
+      }else{
+        return response.json(election);
+      }
     } catch (error) {
       console.log(error);
       if (error.errors[0].message == "Validation len on title failed") {
