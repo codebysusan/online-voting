@@ -406,7 +406,7 @@ app.post(
       const election = await Election.addElection(title, adminId);
       const id = election.id;
       if(request.accepts("html")){
-        return response.status.redirect(`/elections/${id}`);
+        return response.redirect(`/elections/${id}`);
       }else{
         return response.json(election);
       }

@@ -10,13 +10,12 @@ let server, agent;
 const login = async (agent, username, password) => {
   let res = await agent.get("/login");
   let csrfToken = extractCsrfToken(res);
-  res = await agent.post("/session").send({
+  res = await agent.post("/sessionAdmin").send({
     email: username,
     password: password,
     _csrf: csrfToken,
   });
 };
-
 
 function extractCsrfToken(res) {
   var $ = cheerio.load(res.text);
@@ -52,6 +51,16 @@ describe("Online Voting Application", function () {
     expect(res.statusCode).toBe(302);
   });
 
+  test("Sign in", async () => {
+    let res = await agent.get("/login");
+    const csrfToken = extractCsrfToken(res);
+    let response = await agent.post("/sessionAdmin").send({
+      email: "susank@gmail.com",
+      password: "12345678",
+      _csrf: csrfToken,
+    });
+    expect(response.statusCode).toBe(302);
+  });
 
   test("Sign out", async () => {
     let res = await agent.get("/elections");
@@ -62,122 +71,242 @@ describe("Online Voting Application", function () {
     expect(res.statusCode).toBe(302);
   });
 
-  // test("Sign in", async () =>{
-  //   let res = await agent.get("/login");
-  //   const csrfToken = extractCsrfToken(res);
-  //   let response = await agent.post("/session").send({
-  //     email: "susank@gmail.com",
-  //     password: "12345678",
-  //     _csrf: csrfToken,
-  //   });
-  //   expect(response.statusCode).toBe(302);
-  // });
+  test("Creates a election and responds with json at /createElections POST endpoint", async () => {
+    const agent = request.agent(server);
+    await login(agent, "susank@gmail.com", "12345678");
+    const res = await agent.get("/elections/new");
+    const csrfToken = extractCsrfToken(res);
+    const response = await agent.post("/createElections").send({
+      title: "PM Election of Nepal",
+      _csrf: csrfToken,
+    });
+    console.log(response);
+    expect(response.statusCode).toBe(302);
+  });
 
-  // test("Sign out", async () => {
-  //   let res = await agent.get("/elections");
-  //   expect(res.statusCode).toBe(200);
-  //   res = await agent.get("/signout");
-  //   expect(res.statusCode).toBe(302);
-  //   res = await agent.get("/elections");
-  //   expect(res.statusCode).toBe(302);
-  // });
+  test("Creates a question and responds with json at /createQuestions", async () => {
+    // Created election first
+    const agent = request.agent(server);
+    await login(agent, "susank@gmail.com", "12345678");
+    let res = await agent.get("/elections/new");
+    let csrfToken = extractCsrfToken(res);
+    const createElection = await agent.post("/createElections").send({
+      title: "PM Election of Nepal",
+      _csrf: csrfToken,
+    });
+    expect(createElection.statusCode).toBe(302);
 
-  // test("Creates a election and responds with json at /createElections POST endpoint", async () => {
-  //   const agent = request.agent(server);
-  //   await login(agent, "susank@gmail.com", "12345678");
-  //   const res = await agent.get("/elections/new");
-  //   const csrfToken = extractCsrfToken(res);
-  //   const response = await agent.post("/createElections").send({
-  //     title: "PM Election of Nepal",
-  //     _csrf: csrfToken,
-  //   });
-  //   console.log(response);
-  //   expect(response.statusCode).toBe(302);
-  // });
+    //  To find out the last index of election.
+    const groupedElectionsResponse = await agent
+      .get("/elections")
+      .set("Accept", "application/json");
+    const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
+    const electionsCount = parsedGroupedResponse.length;
+    const latestElection = parsedGroupedResponse[electionsCount - 1];
 
-  // test("Creates a question and responds with json at /createQuestions POST endpoint", async () => {
-  //   // Created election first
-  //   const agent = request.agent(server);
-  //   await login(agent, "susank@gmail.com", "12345678");
-  //   let res = await agent.get("/elections/new");
-  //   let csrfToken = extractCsrfToken(res);
-  //   const createElection = await agent.post("/createElections").send({
-  //     title: "PM Election of Nepal",
-  //     _csrf: csrfToken,
-  //   });
-  //   // Checking whether the election is created or not.
-  //   expect(createElection.statusCode).toBe(302);
-  // });
+    //  Created new question for specific election
+    res = await agent.get(`/elections/${latestElection.id}/questions/new`);
+    csrfToken = extractCsrfToken(res);
+    const createQuestion = await agent.post("/createQuestions").send({
+      question: "New Prime Minister of Nepal",
+      description: "There are three candidates. There are rabi, pushpa, khadga",
+      electionId: latestElection.id,
+      _csrf: csrfToken,
+    });
+    //  Checking whether the question is created or not.
+    expect(createQuestion.statusCode).toBe(302);
+  });
 
-  //   // To find out the last index of election.
-  //   const groupedElectionsResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
-  //   const electionsCount = parsedGroupedResponse.length;
-  //   const latestElection = parsedGroupedResponse[electionsCount - 1];
+  test("Creates a answer and responds with json at /createOptions POST endpoint", async () => {
+    const agent = request.agent(server);
+    await login(agent, "susank@gmail.com", "12345678");
 
-  //   // Created new question for specific election
-  //   res = await agent.get(`/elections/${latestElection.id}/questions/new`);
-  //   csrfToken = extractCsrfToken(res);
-  //   const createQuestion = await agent.post("/createQuestions").send({
-  //     question: "New Prime Minister of Nepal",
-  //     description: "There are three candidates. There are rabi, pushpa, khadga",
-  //     electionId: latestElection.id,
-  //     _csrf: csrfToken,
-  //   });
-  //   // Checking whether the question is created or not.
-  //   expect(createQuestion.statusCode).toBe(302);
-  // });
+    // Created election first
+    let res = await agent.get("/elections/new");
+    let csrfToken = extractCsrfToken(res);
+    const createElection = await agent.post("/createElections").send({
+      title: "PM Election of Nepal",
+      _csrf: csrfToken,
+    });
+    // Checking whether the election is created or not.
+    expect(createElection.statusCode).toBe(302);
 
-  // test("Creates a answer and responds with json at /createOptions POST endpoint", async () => {
-  //   const agent = request.agent(server);
-  //   await login(agent, "susank@gmail.com", "12345678");
-  //   // Created election first
-  //   let res = await agent.get("/elections/new");
-  //   let csrfToken = extractCsrfToken(res);
-  //   const createElection = await agent.post("/createElections").send({
-  //     title: "PM Election of Nepal",
-  //     _csrf: csrfToken,
-  //   });
-  //   // Checking whether the election is created or not.
-  //   expect(createElection.statusCode).toBe(302);
+    // To find out the last index of election.
+    const groupedElectionsResponse = await agent
+      .get("/elections")
+      .set("Accept", "application/json");
+    const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
+    const electionsCount = parsedGroupedResponse.length;
+    const latestElection = parsedGroupedResponse[electionsCount - 1];
 
-  //   // To find out the last index of election.
-  //   const groupedElectionsResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
-  //   const electionsCount = parsedGroupedResponse.length;
-  //   const latestElection = parsedGroupedResponse[electionsCount - 1];
+    // Created new question for specific election
+    res = await agent.get(`/elections/${latestElection.id}/questions/new`);
+    csrfToken = extractCsrfToken(res);
+    const createQuestion = await agent.post("/createQuestions").send({
+      question: "New Prime Minister of Nepal",
+      description: "There are three candidates. There are rabi, pushpa, khadga",
+      electionId: latestElection.id,
+      _csrf: csrfToken,
+    });
+    // Checking whether the question is created or not.
+    expect(createQuestion.statusCode).toBe(302);
 
-  //   // Created new question for specific election
-  //   res = await agent.get(`/elections/${latestElection.id}/questions/new`);
-  //   csrfToken = extractCsrfToken(res);
-  //   const createQuestion = await agent.post("/createQuestions").send({
-  //     question: "New Prime Minister of Nepal",
-  //     description: "There are three candidates. There are rabi, pushpa, khadga",
-  //     electionId: latestElection.id,
-  //     _csrf: csrfToken,
-  //   });
-  //   // Checking whether the question is created or not.
-  //   expect(createQuestion.statusCode).toBe(302);
+    // To find out the latest index of question
+    const groupedQuestionsResponse = await agent
+      .get(`/elections/${latestElection.id}/questions`)
+      .set("Accept", "application/json");
+    const parsedGroupedQuestionsResponse = JSON.parse(
+      groupedQuestionsResponse.text
+    );
+    const questionsCount = parsedGroupedQuestionsResponse.length;
+    const latestQuestion = parsedGroupedQuestionsResponse[questionsCount - 1];
+    res = await agent.get(`/questions/${latestQuestion.id}`);
+    csrfToken = extractCsrfToken(res);
+    const createOptions = await agent.post("/createOptions").send({
+      options: "Rabi Lamichanne",
+      questionId: latestQuestion.id,
+      _csrf: csrfToken,
+    });
+    // Checking whether the option is created or not.
+    expect(createOptions.statusCode).toBe(302);
+  });
 
-  //   // To find out the latest index of question
-  //   const groupedQuestionsResponse = await agent
-  //     .get(`/elections/${latestElection.id}/questions`)
-  //     .set("Accept", "application/json");
-  //     const parsedGroupedQuestionsResponse = JSON.parse(groupedQuestionsResponse.text);
-  //     const questionsCount = parsedGroupedQuestionsResponse.length;
-  //     const latestQuestion = parsedGroupedQuestionsResponse[questionsCount - 1];
-  //     res = await agent.get(`/questions/${latestQuestion.id}`);
-  //     csrfToken = extractCsrfToken(res);
-  //     const createOptions = await agent.post("/createOptions").send({
-  //       options: "Rabi Lamichanne",
-  //       questionId: latestQuestion.id,
-  //       _csrf: csrfToken
-  //     });
-  //     expect(createOptions.statusCode).toBe(302);
-  // });
-  
+  test("Creates a voter and responds with a json at /createVoters POST endpoint", async () => {
+    const agent = request.agent(server);
+    await login(agent, "susank@gmail.com", "12345678");
+
+    // Created election first
+    let res = await agent.get("/elections/new");
+    let csrfToken = extractCsrfToken(res);
+    const createElection = await agent.post("/createElections").send({
+      title: "PM Election of Nepal",
+      _csrf: csrfToken,
+    });
+    // Checking whether the election is created or not.
+    expect(createElection.statusCode).toBe(302);
+
+    // To find out the last index of election.
+    const groupedElectionsResponse = await agent
+      .get("/elections")
+      .set("Accept", "application/json");
+    const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
+    const electionsCount = parsedGroupedResponse.length;
+    const latestElection = parsedGroupedResponse[electionsCount - 1];
+
+    // Created new question for specific election
+    res = await agent.get(`/elections/${latestElection.id}/questions/new`);
+    csrfToken = extractCsrfToken(res);
+    const createQuestion = await agent.post("/createQuestions").send({
+      question: "New Prime Minister of Nepal",
+      description: "There are three candidates. There are rabi, pushpa, khadga",
+      electionId: latestElection.id,
+      _csrf: csrfToken,
+    });
+    // Checking whether the question is created or not.
+    expect(createQuestion.statusCode).toBe(302);
+
+    // To find out the latest index of question
+    const groupedQuestionsResponse = await agent
+      .get(`/elections/${latestElection.id}/questions`)
+      .set("Accept", "application/json");
+    const parsedGroupedQuestionsResponse = JSON.parse(
+      groupedQuestionsResponse.text
+    );
+    const questionsCount = parsedGroupedQuestionsResponse.length;
+    const latestQuestion = parsedGroupedQuestionsResponse[questionsCount - 1];
+    res = await agent.get(`/questions/${latestQuestion.id}`);
+    csrfToken = extractCsrfToken(res);
+    const createOptions = await agent.post("/createOptions").send({
+      options: "Rabi Lamichanne",
+      questionId: latestQuestion.id,
+      _csrf: csrfToken,
+    });
+    // Checking whether the option is created or not.
+    expect(createOptions.statusCode).toBe(302);
+
+    res = await agent.get(`/elections/${latestElection.id}/voters`);
+    csrfToken = extractCsrfToken(res);
+    const createVoters = await agent.post("/createVoters").send({
+      electionId: latestElection.id,
+      voterId: "2001",
+      password: "1234",
+      _csrf: csrfToken,
+    });
+    expect(createVoters.statusCode).toBe(302);
+  });
+
+  //* Todos for voters
+
+  //* Login for voters
+  test("Voters Login", async () => {
+    const agent = request.agent(server);
+    await login(agent, "susank@gmail.com", "12345678");
+
+    // Created election first
+    let res = await agent.get("/elections/new");
+    let csrfToken = extractCsrfToken(res);
+    const createElection = await agent.post("/createElections").send({
+      title: "PM Election of Nepal",
+      _csrf: csrfToken,
+    });
+    
+    // Checking whether the election is created or not.
+    expect(createElection.statusCode).toBe(302);
+
+    // To find out the last index of election.
+    const groupedElectionsResponse = await agent
+      .get("/elections")
+      .set("Accept", "application/json");
+    const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
+    const electionsCount = parsedGroupedResponse.length;
+    const latestElection = parsedGroupedResponse[electionsCount - 1];
+
+    // Created new question for specific election
+    res = await agent.get(`/elections/${latestElection.id}/questions/new`);
+    csrfToken = extractCsrfToken(res);
+    const createQuestion = await agent.post("/createQuestions").send({
+      question: "New Prime Minister of Nepal",
+      description: "There are three candidates. There are rabi, pushpa, khadga",
+      electionId: latestElection.id,
+      _csrf: csrfToken,
+    });
+    // Checking whether the question is created or not.
+    expect(createQuestion.statusCode).toBe(302);
+
+    // To find out the latest index of question
+    const groupedQuestionsResponse = await agent
+      .get(`/elections/${latestElection.id}/questions`)
+      .set("Accept", "application/json");
+    const parsedGroupedQuestionsResponse = JSON.parse(
+      groupedQuestionsResponse.text
+    );
+    const questionsCount = parsedGroupedQuestionsResponse.length;
+    const latestQuestion = parsedGroupedQuestionsResponse[questionsCount - 1];
+    res = await agent.get(`/questions/${latestQuestion.id}`);
+    csrfToken = extractCsrfToken(res);
+    const createOptions = await agent.post("/createOptions").send({
+      options: "Rabi Lamichanne",
+      questionId: latestQuestion.id,
+      _csrf: csrfToken,
+    });
+    await agent.post("/createOptions").send({
+      options: "Kaushal Guragain",
+      questionId: latestQuestion.id,
+      _csrf: csrfToken,
+    });
+    // Checking whether the option is created or not.
+    expect(createOptions.statusCode).toBe(302);
+
+    // Creating voters 
+    res = await agent.get(`/elections/${latestElection.id}/voters`);
+    csrfToken = extractCsrfToken(res);
+    const createVoters = await agent.post("/createVoters").send({
+      electionId: latestElection.id,
+      voterId: "2001",
+      password: "1234",
+      _csrf: csrfToken,
+    });
+    // Checking Voters
+    expect(createVoters.statusCode).toBe(302);
+  });
 });
