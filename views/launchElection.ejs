@@ -19,7 +19,6 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             _csrf: token,
-            presentStatus: "Ended",
           }),
         }).then((res) => {
           if (res.ok) {
@@ -84,12 +83,22 @@
             >Preview Results</a
           >
         </p>
-        <p class="my-6 underline">
-          <a class="text-blue-600" href="/elections/<%= election.id%>" onclick="{endElection(<%=election.id%>)}"
+        <form action="/elections/<%=election.id%>/end" method="post">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <button
+            type="submit"
+            id="launchBtn"
+            class="text-white bg-green-600 px-5 py-3 font-medium rounded hover:bg-green-800"
+          >
+            End Election
+          </button>
+        </form>
+        <!-- <p class="my-6 underline">
+          <a class="text-blue-600 hover:cursor-pointer" href="#" onclick="{endElection(<%=election.id%>)}"
             >End election</a
           >
         </p>
-      </div>
+      </div> -->
       <div class="mt-8">
         <% if(messages && messages.alert && messages.alert.length > 0)  { %>
           <% for(var i=0; i<messages.alert.length; i++) { %>
