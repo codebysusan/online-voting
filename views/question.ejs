@@ -111,10 +111,6 @@
               <form action="/question/<%=questions[i].id%>" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                 <p class="py-4 underline">
-                  <!-- <a
-                    class="text-blue-600 hover:cursor-pointer"
-                    onclick="{deleteQuestion(<%= questions[i].id %>)}"
-                  > -->
                     <button
                     type="submit"
                       class="text-white bg-green-600 px-2 py-3 font-medium rounded hover:bg-green-800"
@@ -138,7 +134,6 @@
               <% } %>
             <% } %>
           </div>
-          <!-- Need to add alert message here when admin try to delete last question of the ballot -->
         </div>
       </div>
     </div>

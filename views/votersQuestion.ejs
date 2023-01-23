@@ -21,7 +21,6 @@
         <form action="/submitElection" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <input type="hidden" name="electionId" value="<%= election.id %>" />
-          <h4 class="text-xl"></h4>
           <h1 class="text-4xl mt-6 font-bold"><%= election.title %></h1>
           <div class="my-6">
             <% if(questions.length == 0){%> <%}else if(questions.length > 0){%>

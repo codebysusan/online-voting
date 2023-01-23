@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         where: {
           questionId,
         },
+        order:[["id","ASC"]],
       });
     }
   }

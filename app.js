@@ -807,110 +807,199 @@ app.get(
       const isAdmin = checkAdmin(admin);
       const electionId = request.params.id;
       const election = await Election.getElection(electionId, adminId);
-      const questions = await Questions.getAllQuestions(electionId);
-      const questionLength = questions.length;
-      let getOptions;
-      let options = [];
-      let questionId;
-      for (let i = 0; i < questionLength; i++) {
-        questionId = questions[i].id;
-        getOptions = await Answers.getAllAnswers(questionId);
-        options.push(getOptions);
+      if (isAdmin && election != null) {
+        const questions = await Questions.getAllQuestions(electionId);
+        const questionLength = questions.length;
+        let getOptions;
+        let options = [];
+        let questionId;
+        for (let i = 0; i < questionLength; i++) {
+          questionId = questions[i].id;
+          getOptions = await Answers.getAllAnswers(questionId);
+          options.push(getOptions);
+        }
+        return response.render("previewBallot", {
+          title: "Preview Ballot | Online Voting Platform",
+          csrfToken: request.csrfToken(),
+          isSignedIn: true,
+          election,
+          questions,
+          options,
+          isAdmin,
+        });
+      } else {
+        return response.render("errorpage", {
+          title: "Error Page | Online Voting Platform",
+          csrfToken: request.csrfToken(),
+          isSignedIn: true,
+          isAdmin,
+          errormsg: "This is not the webpage you are looking for.",
+        });
       }
-      return response.render("previewBallot", {
-        title: "Preview Ballot | Online Voting Platform",
-        csrfToken: request.csrfToken(),
-        isSignedIn: true,
-        election,
-        questions,
-        options,
-        isAdmin,
-      });
     } catch (error) {
       console.log(error);
       response.status(422).json(error);
     }
+  }
+);
 
-    // try {
-    //   console.log("Hellow from prev 1")
-    //   const admin = request.user;
-    //   const adminId = admin.id;
-    //   const isAdmin = checkAdmin(admin);
-    //   const electionId = request.params.id;
-    //   const election = await Election.getElection(electionId, adminId);
-    //   const questions = await Questions.getAllQuestions(electionId);
-    //   const questionLength = questions.length;
-    //   let getOptions;
-    //   let options = [];
-    //   let questionId;
-    //   if (isAdmin && election != null) {
-    //   console.log("Hellow from prev 2")
-    //     for (let i = 0; i < questionLength; i++) {
-    //       questionId = questions[i].id;
-    //       getOptions = await Answers.getAllAnswers(questionId);
-    //       options.push(getOptions);
-    //     }
-    //   console.log("Hellow from prev 4")
-
-    //     return response.render("previewBallot", {
-    //       title: "Preview Ballot | Online Voting Platform",
-    //       csrfToken: request.csrfToken(),
-    //       isSignedIn: true,
-    //       election,
-    //       questions,
-    //       options,
-    //       isAdmin,
-    //     });
-    //   } else {
-    //   console.log("Hellow from prev 3")
-    //     return response.render("errorpage", {
-    //       title: "Error Page | Online Voting Platform",
-    //       csrfToken: request.csrfToken(),
-    //       isSignedIn: true,
-    //       isAdmin,
-    //       errormsg: "This is not the webpage you are looking for.",
-    //     });
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    //   return response.json(error);
-    // }
+app.get(
+  "/elections/:id/trackResults",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    try {
+      const admin = request.user;
+      const isAdmin = checkAdmin(admin);
+      if (isAdmin) {
+        const adminId = admin.id;
+        const electionId = request.params.id;
+        const election = await Election.getElection(electionId, adminId);
+        const questions = await Questions.getAllQuestions(electionId);
+        const questionLength = questions.length;
+        let getOptions;
+        let options = [];
+        let questionId;
+        let getResults;
+        let resultCount = [];
+        const voters = await Voters.findAll({
+          where: {
+            electionId,
+          },
+        });
+        const totalVotersCount = voters.length;
+        const castedVoters = await Voters.findAll({
+          where: {
+            electionId,
+            voted: true,
+          },
+        });
+        const castedVotersCount = castedVoters.length;
+        for (let i = 0; i < questionLength; i++) {
+          questionId = questions[i].id;
+          getOptions = await Answers.getAllAnswers(questionId);
+          options.push(getOptions);
+          for (let j = 0; j < getOptions.length; j++) {
+            getResults = await Result.findAll({
+              where: {
+                questionId,
+                optionId: getOptions[j].id,
+                electionId,
+              },
+              order: [["optionId", "ASC"]],
+            });
+            resultCount.push(getResults.length);
+          }
+        }
+        if (election.presentStatus == "Launched") {
+          return response.render("trackResults", {
+            title: "Track Results | Online Voting Platform",
+            csrfToken: request.csrfToken(),
+            isSignedIn: true,
+            election,
+            questions,
+            options,
+            isAdmin,
+            totalVotersCount,
+            castedVotersCount,
+            resultCount,
+          });
+        }
+        if (election.presentStatus == "Added") {
+          return response.render("errorpage", {
+            title: "Access Denied | Online Voting Platform",
+            csrfToken: request.csrfToken(),
+            isSignedIn: true,
+            isAdmin,
+            errormsg: "The election has not been launched yet.",
+          });
+        }
+      } else {
+        return response.render("errorpage", {
+          title: "Access Denied | Online Voting Platform",
+          csrfToken: request.csrfToken(),
+          isSignedIn: true,
+          isAdmin,
+          errormsg: "This is not the webpage you are looking for.",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      response.status(422).json(error);
+    }
   }
 );
 
 // View results after
-app.get(
-  "/elections/:id/viewResults",
-  async (request, response) => {
-    try {
-      const electionId = request.params.id;
-      const election = await Election.findByPk(electionId);
-      const questions = await Questions.getAllQuestions(electionId);
-      if(election.presentStatus == "Ended"){
-        return response.render("viewResults", {
-          title: "View Result | Online Voting Platform",
-          csrfToken: request.csrfToken(),
-          isSignedIn: false,
-          election,
-          questions,
+app.get("/elections/:id/viewResults", async (request, response) => {
+  try {
+    const electionId = request.params.id;
+    const election = await Election.getVotersElection(electionId);
+    const questions = await Questions.getAllQuestions(electionId);
+    const questionLength = questions.length;
+    let getOptions;
+    let options = [];
+    let questionId;
+    let getResults;
+    let resultCount = [];
+    const voters = await Voters.findAll({
+      where: {
+        electionId,
+      },
+    });
+    const totalVotersCount = voters.length;
+    const castedVoters = await Voters.findAll({
+      where: {
+        electionId,
+        voted: true,
+      },
+    });
+    const castedVotersCount = castedVoters.length;
+    for (let i = 0; i < questionLength; i++) {
+      questionId = questions[i].id;
+      getOptions = await Answers.getAllAnswers(questionId);
+      options.push(getOptions);
+      for (let j = 0; j < getOptions.length; j++) {
+        getResults = await Result.findAll({
+          where: {
+            questionId,
+            optionId: getOptions[j].id,
+            electionId,
+          },
+          order: [["optionId", "ASC"]],
         });
+        resultCount.push(getResults.length);
       }
-      else{
-        return response.render("errorpage", {
-          title: "Access Denied | Online Voting Platform",
-          csrfToken: request.csrfToken(),
-          isSignedIn: false,
-          isAdmin:false,
-          errormsg: "The Election has not ended yet. Please wait for election to end to view results",
-        });
-      }
-      
-    } catch (error) {
-      console.log(error);
-      return response.status(422).json(error);
     }
+    if (election.presentStatus == "Ended") {
+      return response.render("viewResults", {
+        title: "Track Results | Online Voting Platform",
+        csrfToken: request.csrfToken(),
+        isSignedIn: false,
+        election,
+        questions,
+        options,
+        totalVotersCount,
+        castedVotersCount,
+        resultCount,
+      });
+    }
+    if (
+      election.presentStatus == "Added" ||
+      election.presentStatus == "Launched"
+    ) {
+      return response.render("errorpage", {
+        title: "Access Denied | Online Voting Platform",
+        csrfToken: request.csrfToken(),
+        isSignedIn: false,
+        isAdmin: false,
+        errormsg: "The election has not been launched yet.",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return response.status(422).json(error);
   }
-);
+});
 
 // End election
 app.get(

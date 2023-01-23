@@ -10,25 +10,41 @@
     <title><%= title %></title>
   </head>
   <body>
-    <div class="grid grid-cols-6">
-      <div class="col-start-3 col-span-2">
-        <h1 class="mt-6 text-4xl font-bold" style="text-align: center">
-          Online Voting Platform
-        </h1>
-      </div>
-    </div>
-    <hr class="mt-6" />
     <div class="grid grid-cols-5">
       <div class="col-start-2 col-span-3">
-        <h1 class="text-4xl mt-6 font-bold"><%= election.title %> - Result</h1>
+        <%- include('header.ejs') %>
+      </div>
+    </div>
+    <hr />
+    <div class="grid grid-cols-5">
+      <div class="col-start-2 col-span-3">
+        <nav class="mt-8">
+          <ul class="flex">
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections">Home</a>
+            </li>
+            <span class="mx-3 text-blue-800"> >> </span>
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections/<%=election.id%>"><%= election.title %></a>
+            </li>
+            <span class="mx-3 text-blue-800"> >> </span>
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections/<%=election.id%>/trackResults">Current Status</a>
+            </li>
+          </ul>
+        </nav>
+        <h1 class="text-4xl mt-6 font-bold">
+          <%= election.title %> - Current Result
+        </h1>
         <div class="mt-6">
           <p class="text-xl">Total Voters: <%=totalVotersCount%></p>
           <p class="text-xl">Total Vote Casted: <%=castedVotersCount%></p>
         </div>
 
         <div class="my-6">
-          <% if(questions.length == 0){%> <%}else if(questions.length > 0){%>
-          <%let k = 0%> <% for(let i = 0; i < questions.length; i++){ %>
+          <% if(questions.length == 0){%> <%}else if(questions.length > 0){%> 
+            <%let k = 0%>
+            <% for(let i = 0; i < questions.length; i++){ %>
           <div class="my-6">
             <p class="text-xl font-bold text-gray-900">
               <%= i+1%>) <%= questions[i].question%>
@@ -38,14 +54,15 @@
             </p>
             <div class="mt-4 ml-6">
               <% for(let j = 0; j < options[i].length; j++){ %>
-
-              <hr class="w-1/2" />
+                
+                <hr class="w-1/2">
               <div class="flex w-1/2 my-4">
                 <div class="flex-auto ml-6"><%= options[i][j].options %></div>
                 <div class="flex-end mr-6"><%= resultCount[k] %></div>
               </div>
               <hr class="w-1/2" />
-              <% k++%> <% }%>
+              <% k++%>
+              <% }%>
             </div>
 
             <% if( i < questions.length -1){ %>
