@@ -49,10 +49,12 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       description: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         validate:{
-          len: 1,
+          len: {
+            min: 1,
+          },
           notNull: true
         }
       },

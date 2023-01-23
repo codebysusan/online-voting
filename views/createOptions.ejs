@@ -5,16 +5,62 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="<%= csrfToken %>" />
-    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/index.js"></script>
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
+    <script>
+      var token = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
+      function deleteOptions(id) {
+        // console.log(id);
+        fetch(`/options/${id}`, {
+          method: "delete",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            _csrf: token,
+          }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              window.location.reload();
+            }
+          })
+          .catch((err) => console.log(err));
+      }
+    </script>
   </head>
   <body>
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
         <%- include('header.ejs') %>
-        <h1 class="text-4xl mt-6 font-bold">Question </h1>
-        <p class="pt-4 font-medium text-xl"><%= question.question %></p>
+      </div>
+    </div>
+    <hr>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <nav class="mt-8">
+          <ul class="flex">
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections">Home</a>
+            </li>
+            <span class="mx-3 text-blue-800"> >> </span>
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections/<%=election.id%>"><%= election.title %></a>
+            </li>
+            <span class="mx-3 text-blue-800"> > </span>
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections/<%=election.id%>/questions">Questions</a>
+            </li>
+            <span class="mx-3 text-blue-800"> >> </span>
+            <li class="flex-auto">
+              <a class="text-blue-800" href="/questions/<%=question.id%>"><%= question.question%></a>
+            </li>
+          </ul>
+        </nav>
+        <h1 class="text-4xl mt-6 font-bold"><%= question.question %></h1>
+        <p class="ml-6 pt-4 text-gray-500 font-medium text-xl"><%= question.description %></p>
         <form class="mt-4" method="post" action="/createOptions">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <input type="hidden" name="questionId" value="<%= question.id %>" />
@@ -35,6 +81,15 @@
             </div>
           </div>
         </form>
+        <div class="mt-6">
+          <% if(messages && messages.alert && messages.alert.length > 0)  { %>
+            <% for(var i=0; i<messages.alert.length; i++) { %>
+              <div id="alert-msg" class="p-4 mb-4 w-3/4 text-sm text-blue-800 bg-blue-100 rounded-lg dark:bg-gray-800 dark:text-blue-400 fade-out" role="alert">
+                <%= messages.alert[i] %>
+              </div>
+            <% } %>
+          <% } %>
+        </div>
 
         <div class="mt-4">
           <h5 class="text-xl underline inline-block font-semibold">
@@ -45,25 +100,29 @@
             <% for(var i = 0; i < getOptions.length; i++){%>
             <li class="pt-2 text-lg">
               <div class="flex">
-                  
                 <div class="flex-auto">
-                    <div class="flex">
-                        <div class="flex-start pr-4">
-                            <p> <%= i+1 %>.</p>
-                        </div>
-                        <div class="flex-auto">
-                            <p> <%= getOptions[i].options %></p>
-                        </div>
+                  <div class="flex">
+                    <div class="flex-start pr-4">
+                      <p><%= i+1 %>.</p>
                     </div>
+                    <div class="flex-auto">
+                      <p><%= getOptions[i].options %></p>
+                    </div>
+                  </div>
                 </div>
                 <div class="flex-end px-8">
                   <p class="pb-4 underline">
-                    <a class="text-blue-600" href="">Edit</a>
+                    <a class="text-blue-600" href="/question/<%= question.id%>/editOption/<%=getOptions[i].id%>">Edit</a>
                   </p>
                 </div>
                 <div class="flex-end">
                   <p class="pb-4 underline">
-                    <a class="text-blue-600" href="">Delete</a>
+                    <a
+                      class="text-blue-600"
+                      href="#"
+                      onclick="{deleteOptions(<%= getOptions[i].id %>)}"
+                      >Delete</a
+                    >
                   </p>
                 </div>
               </div>

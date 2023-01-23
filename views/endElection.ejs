@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script class="" src="https://cdn.tailwindcss.com"></script>
+    <title><%= title %></title>
+  </head>
+  <body>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <%- include('header.ejs') %>
+      </div>
+    </div>
+    <hr>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <nav class="mt-8">
+          <ul class="flex">
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections">Home</a>
+            </li>
+            <span class="mx-3 text-blue-800"> >> </span>
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections/<%=election.id%>"><%= election.title %></a>
+            </li>
+          </ul>
+        </nav>
+        <h1 class="text-4xl my-6 font-bold"><%= election.title %> election has been ended.</h1>
+        <p>You can view the result in the below link:</p>
+        <p class="my-3">
+          <a class="text-blue-800 underline" href="/elections/<%=election.id%>/viewResults">
+            https://online-voting-08vr.onrender.com/elections/<%=election.id%>/viewResults
+          </a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

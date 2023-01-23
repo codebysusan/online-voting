@@ -6,42 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="<%= csrfToken %>" />
     <link rel="stylesheet" href="/css/style.css" />
-    <script class="" src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
-    <script src="/js/index.js"></script>
+    <script src="./js/index.js"></script>
   </head>
   <body>
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
-        <%- include('header.ejs') %>
+        <%- include('votersheader.ejs') %>
       </div>
-      </div>
-      <hr>
-      <div class="grid grid-cols-6">
+    </div>
+    <hr class="my-8">
+    <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
-        <nav class="mt-8">
-          <ul class="flex">
-            <li class="flex-start">
-              <a class="text-blue-800" href="/elections">Home</a>
-            </li>
-            <span class="mx-3 text-blue-800">
-              >>
-            </span>
-            <li class="flex-start">
-              <a class="text-blue-800" href="/elections/new">Create New Election</a>
-            </li>
-          </ul>
-        </nav>
-        <h1 class="text-4xl mt-6 font-bold">Create New Election</h1>
-        <form action="/createElections" method="post">
+        <h6 class="py-4 text-2xl font-bold text-center">Voters Login</h6>
+        <form action="/sessionVoter" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <div class="pt-6">
-            <label for="title" class="text-xl "
-              >What is your election's name?</label
-            >
+          <input type="hidden" name="electionId" value="<%= election.id %>" />
+          <div class="py-3">
+            <label for="votersId">Voter ID:</label>
             <input
               type="text"
-              name="title"
+              name="votersId"
+              class="border rounded p-2 border-gray-300 text-gray-900 w-full"
+            />
+          </div>
+          <div class="py-3">
+            <label for="votersPassword">Voter Password:</label>
+            <input
+              type="password"
+              name="votersPassword"
               class="border rounded p-2 border-gray-300 text-gray-900 w-full"
             />
           </div>
@@ -50,15 +44,15 @@
               type="submit"
               class="text-white bg-green-600 px-5 py-3 font-medium rounded hover:bg-green-800"
             >
-              Submit
+              Sign In
             </button>
           </div>
         </form>
         <div>
-          <% if(messages && messages.alert && messages.alert.length > 0)  { %>
-            <% for(var i=0; i<messages.alert.length; i++) { %>
+          <% if(messages && messages.error && messages.error.length > 0)  { %>
+            <% for(var i=0; i<messages.error.length; i++) { %>
               <div id="alert-msg" class="p-4 mb-4 text-sm text-blue-800 bg-blue-100 rounded-lg dark:bg-gray-800 dark:text-blue-400 fade-out" role="alert">
-                <%= messages.alert[i] %>
+                <%= messages.error[i] %>
               </div>
             <% } %>
           <% } %>

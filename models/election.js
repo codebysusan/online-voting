@@ -16,6 +16,15 @@ module.exports = (sequelize, DataTypes) => {
       Election.hasMany(models.Questions, {
         foreignKey: "electionId",
       });
+
+      Election.hasMany(models.Voters, {
+        foreignKey: "electionId"
+      });
+
+      Election.hasMany(models.Result, {
+        foreignKey: "electionId"
+      });
+      
     }
     static addElection(title, adminId) {
       return this.create({
@@ -33,7 +42,16 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
-    static getElection(id) {
+    static getElection(id, adminId) {
+      return this.findOne({
+        where:{
+          id,
+          adminId
+        }
+      });
+    }
+
+    static getVotersElection(id){
       return this.findByPk(id);
     }
   }

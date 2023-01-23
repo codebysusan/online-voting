@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script class="" src="https://cdn.tailwindcss.com"></script>
+    <title><%= title %></title>
+  </head>
+  <body>
+    <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2">
+        <h1 class="mt-6 text-4xl font-bold" style="text-align: center">
+          Online Voting Platform
+        </h1>
+      </div>
+    </div>
+    <hr class="mt-6" />
+    <div class="grid grid-cols-5">
+      <div class="col-start-2 col-span-3">
+        <h1 class="text-4xl mt-6 font-bold"><%= election.title %> - Result</h1>
+        <div class="mt-6">
+          <p class="text-xl">Total Voters: <%=totalVotersCount%></p>
+          <p class="text-xl">Total Vote Casted: <%=castedVotersCount%></p>
+        </div>
+
+        <div class="my-6">
+          <% if(questions.length == 0){%> <%}else if(questions.length > 0){%>
+          <%let k = 0%> <% for(let i = 0; i < questions.length; i++){ %>
+          <div class="my-6">
+            <p class="text-xl font-bold text-gray-900">
+              <%= i+1%>) <%= questions[i].question%>
+            </p>
+            <p class="text-lg ml-6 font-normal text-gray-600">
+              <%= questions[i].description%>
+            </p>
+            <div class="mt-4 ml-6">
+              <% for(let j = 0; j < options[i].length; j++){ %>
+
+              <hr class="w-1/2" />
+              <div class="flex w-1/2 my-4">
+                <div class="flex-auto ml-6"><%= options[i][j].options %></div>
+                <div class="flex-end mr-6"><%= resultCount[k] %></div>
+              </div>
+              <hr class="w-1/2" />
+              <% k++%> <% }%>
+            </div>
+
+            <% if( i < questions.length -1){ %>
+            <hr
+              class="mt-8"
+              style="height: 2px; color: gray; background-color: gray"
+            />
+            <% }%> <% }%> <% }%>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

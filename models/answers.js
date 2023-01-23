@@ -21,17 +21,25 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
-    static getAllAnswers(questionId){
+    static getAllAnswers(questionId) {
       return this.findAll({
         where: {
           questionId,
         },
+        order: [["id", "ASC"]],
       });
     }
   }
   Answers.init(
     {
-      options: DataTypes.STRING,
+      options: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          len: 1,
+          notNull: true,
+        },
+      },
     },
     {
       sequelize,

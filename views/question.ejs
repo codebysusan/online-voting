@@ -5,14 +5,64 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="<%= csrfToken %>" />
-    <link rel="stylesheet" href="./css/style.css" />
+    <meta name="questions" content="<%= questions %>" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/index.js"></script>
     <script class="" src="https://cdn.tailwindcss.com"></script>
     <title><%= title %></title>
+
+    <script>
+      var token = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
+
+      function deleteQuestion(id) {
+        // console.log(questions);
+        console.log(id);
+        fetch(`/question/${id}`, {
+          method: "delete",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            _csrf: token,
+          }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              window.location.reload();
+            }
+          })
+          .catch((err) => console.log(err));
+      }
+    </script>
   </head>
   <body>
     <div class="grid grid-cols-6">
+      <div class="col-start-3 col-span-2"><%- include('header.ejs') %></div>
+    </div>
+    <hr />
+    <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
-        <%- include('header.ejs') %>
+        <nav class="mt-8">
+          <ul class="flex">
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections">Home</a>
+            </li>
+            <span class="mx-3 text-blue-800"> >> </span>
+            <li class="flex-start">
+              <a class="text-blue-800" href="/elections/<%=election.id%>"
+                ><%= election.title %></a
+              >
+            </li>
+            <span class="mx-3 text-blue-800"> >> </span>
+            <li class="flex-start">
+              <a
+                class="text-blue-800"
+                href="/elections/<%=election.id%>/questions"
+                >Questions</a
+              >
+            </li>
+          </ul>
+        </nav>
         <h1 class="text-4xl mt-6 font-bold">
           <%= election.title %> - Question
         </h1>
@@ -27,18 +77,63 @@
           >
         </p>
         <div class="py-6">
-          <% if(questions.length > 0){%> 
-            <% for(let i = 0; i < questions.length; i++){ %>
-              <p class="mb-4">
-                <%= i+1%>.
-                <a href="/questions/ <%= questions[i].id%>">
-                  <%= questions[i].question %>
+          <% if(questions.length > 0){%> <% for(let i = 0; i < questions.length;
+          i++){ %>
+          <div class="flex  items-center">
+            <div class="flex-auto">
+              <div class="flex">
+                <div class="flex-start pr-4">
+                  <p><%= i+1 %>.</p>
+                </div>
+                <div class="flex-auto">
+                  <a href="/questions/<%=questions[i].id%>"
+                    ><%= questions[i].question %></a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="flex-end px-8">
+              <p class="py-4 underline">
+                <a
+                  class="text-blue-600"
+                  href="/question/<%= questions[i].id%>/edit"
+                >
+                  <button
+                    class="text-white bg-green-600 px-5 py-3 font-medium rounded hover:bg-green-800"
+                  >
+                    Edit
+                  </button>
                 </a>
               </p>
-            <% }%> 
-          <% }%>
+            </div>
+            <div class="flex-end">
+              <form action="/question/<%=questions[i].id%>" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <p class="py-4 underline">
+                    <button
+                    type="submit"
+                      class="text-white bg-green-600 px-2 py-3 font-medium rounded hover:bg-green-800"
+                    >
+                      Delete
+                    </button>
+                  </a>
+                </p>
+              </form>
+              
+            </div>
+          </div>
+          <hr>
+          <% }%> <% }%>
+          <div class="mt-6">
+            <% if(messages && messages.alert && messages.alert.length > 0)  { %>
+              <% for(var i=0; i<messages.alert.length; i++) { %>
+                <div id="alert-msg" class="p-4 mb-4 text-sm text-blue-800 bg-blue-100 rounded-lg dark:bg-gray-800 dark:text-blue-400 fade-out" role="alert">
+                  <%= messages.alert[i]%>
+                </div>
+              <% } %>
+            <% } %>
+          </div>
         </div>
-                    
       </div>
     </div>
   </body>
